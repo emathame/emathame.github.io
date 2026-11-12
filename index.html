@@ -3,86 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="PhiloMathematica: mathematics, The Jimmy Files, stories, books and curiosity by George Dimitriadis.">
 <title>PhiloMathematica | Mathematics, Stories & Curiosity</title>
-<meta name="description" content="PhiloMathematica: mathematics, puzzles, The Jimmy Files, books and reflections by George Dimitriadis.">
 <style>
-:root{--navy:#14243c;--blue:#235e9c;--gold:#e8b75a;--light:#f4f7fb}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#243247;background:var(--light);line-height:1.65}
-header{background:var(--navy);color:white;text-align:center;padding:65px 20px}
-header h1{font-size:clamp(2.2rem,6vw,4rem);margin:0;letter-spacing:1px}
-header p{font-size:1.15rem;color:#e1e8f1;margin:12px 0}
-nav{background:#203b5d;text-align:center;padding:15px}
-nav a{color:white;text-decoration:none;margin:0 13px;display:inline-block;font-weight:bold}
-nav a:hover{text-decoration:underline}
-main{max-width:1050px;margin:auto;padding:35px 20px}
-section{background:white;border-radius:12px;padding:30px;margin-bottom:24px;box-shadow:0 3px 14px #152a4412}
-h2{color:var(--navy);margin-top:0}
-.button{display:inline-block;background:var(--blue);color:white;padding:11px 20px;border-radius:7px;text-decoration:none;font-weight:bold}
-.button:hover{background:#163f6b}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
-.cards article{background:#f3f6fa;border-radius:9px;padding:20px}
-.cards h3{margin-top:0;color:var(--navy)}
-footer{text-align:center;background:var(--navy);color:white;padding:25px}
-@media(max-width:600px){nav a{margin:5px 8px}section{padding:22px}}
+:root{--navy:#14243c;--blue:#235e9c;--gold:#e8b75a;--light:#f4f7fb;--ink:#25344a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--light);line-height:1.65}a{color:var(--blue)}
+header{background:linear-gradient(120deg,#14243c,#244d78);color:white;padding:64px 22px 70px;text-align:center}header .eyebrow{color:var(--gold);font-size:.85rem;letter-spacing:.19em;text-transform:uppercase;font-weight:bold}header h1{font-size:clamp(2.5rem,6vw,4.5rem);margin:10px 0 0;letter-spacing:.015em}header p{font-size:1.16rem;color:#e5edf7;margin:12px auto;max-width:680px}.byline{font-size:.92rem;color:#d1deef}
+nav{background:#203b5d;text-align:center;padding:14px 10px;position:sticky;top:0;z-index:10}nav a{display:inline-block;color:white;text-decoration:none;margin:4px 13px;font-weight:bold;font-size:.93rem}nav a:hover,nav a:focus{text-decoration:underline;color:var(--gold)}
+main{max-width:1060px;margin:auto;padding:35px 20px 60px}.intro{background:white;border-radius:16px;padding:35px 38px;margin-bottom:25px;border-top:5px solid var(--gold);box-shadow:0 6px 22px #152a4410}.intro h2{font-size:1.7rem;margin:0 0 12px;color:var(--navy)}
+.section-title{font-size:1.65rem;color:var(--navy);margin:42px 0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}.card{background:white;border-radius:15px;padding:26px;box-shadow:0 5px 20px #152a4410;border:1px solid #e7edf4}.card h3{color:var(--navy);font-size:1.3rem;margin:8px 0 10px}.card p{margin:0 0 17px}.card .symbol{font-size:2rem}.tag{display:inline-block;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:#7d591c;background:#fff3d7;padding:4px 9px;border-radius:20px;font-weight:bold}.button{display:inline-block;background:var(--blue);color:white;padding:11px 17px;border-radius:8px;text-decoration:none;font-weight:bold}.button:hover{background:#174775}.button.secondary{background:#e8eff7;color:#1c4b7b}.button.secondary:hover{background:#d8e7f5}
+.feature{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:stretch}.feature .card{padding:34px}.illustration{background:linear-gradient(145deg,#e4eef9,#cddff2);border-radius:15px;display:flex;align-items:center;justify-content:center;min-height:260px;padding:30px;text-align:center}.illustration .equation{font-size:clamp(2rem,4vw,3.2rem);font-weight:bold;color:#183b66}.illustration p{color:#31567c;margin:10px 0 0}.note{color:#59697d;font-size:.94rem}.link-list{padding-left:20px}.link-list li{margin:9px 0}footer{text-align:center;background:var(--navy);color:#dbe6f3;padding:30px 20px}footer a{color:#fff}
+@media(max-width:650px){.feature{grid-template-columns:1fr}.intro,.feature .card{padding:24px}nav a{margin:4px 8px;font-size:.85rem}}
 </style>
 </head>
 <body>
 <header>
+<div class="eyebrow">Mathematics · Stories · Curiosity</div>
 <h1>PhiloMathematica</h1>
-<p>Mathematics, stories and the pleasure of curiosity</p>
-<p>By George Dimitriadis</p>
+<p>Where mathematics meets imagination, humour and the pleasure of asking questions.</p>
+<div class="byline">By George Dimitriadis</div>
 </header>
-<nav>
-<a href="#about">About</a>
-<a href="#jimmy">The Jimmy Files</a>
-<a href="#mathematics">Mathematics</a>
-<a href="#books">Books</a>
-<a href="#videos">YouTube</a>
+<nav aria-label="Main navigation">
+<a href="#about">About</a><a href="#jimmy">The Jimmy Files</a><a href="#mathematics">Mathematics</a><a href="#books">Books</a><a href="#stories">Stories</a><a href="#videos">YouTube</a>
 </nav>
 <main>
-<section id="about">
-<h2>Welcome to PhiloMathematica</h2>
-<p>Welcome! I'm George Dimitriadis, a retired mathematics teacher and lifelong enthusiast of puzzles, storytelling and the unexpected side of everyday life.</p>
-<p>Here you'll find mathematical curiosities, classroom humour, educational resources, original stories and reflections on the world around us.</p>
-<p>Whether you're a student, a teacher or simply someone who enjoys asking questions, I hope you'll find something here to make you think — and occasionally smile.</p>
+<section id="about" class="intro">
+<span class="tag">Welcome</span>
+<h2>A little curiosity goes a long way</h2>
+<p>I'm George Dimitriadis, a retired mathematics teacher and lifelong enthusiast of puzzles, storytelling and the unexpected side of everyday life.</p>
+<p>Here you'll find mathematical curiosities, classroom humour, original stories, reflections and educational resources. Whether you're a student, a teacher or simply someone who enjoys a good question, I hope you'll find something to make you think — and occasionally smile.</p>
 </section>
-<section id="jimmy">
-<h2>The Jimmy Files</h2>
-<p>Meet Jimmy, a student whose innocent questions have a remarkable ability to turn an ordinary mathematics lesson into something quite extraordinary.</p>
-<p>In The Jimmy Files, familiar mathematical ideas lead to unexpected arguments, puzzles and classroom adventures.</p>
-<p><strong>Featured story:</strong> Jimmy and the Missing Dollar — a mathematical mystery in which a dollar appears to vanish into thin air.</p>
-<a class="button" href="https://youtu.be/cpQwL1cjaxM" target="_blank" rel="noopener noreferrer">Watch Jimmy and the Missing Dollar</a>
+<h2 class="section-title" id="jimmy">The Jimmy Files</h2>
+<div class="feature">
+<section class="card">
+<span class="tag">Featured story & video</span>
+<h3>Jimmy and the Missing Dollar</h3>
+<p>Meet Jimmy, the student whose innocent questions have a remarkable talent for turning an ordinary mathematics lesson into something extraordinary.</p>
+<p>In this mathematical mystery, a dollar seems to vanish into thin air. Can Jimmy and his teacher discover where the arithmetic went wrong?</p>
+<a class="button" href="https://youtu.be/cpQwL1cjaxM" target="_blank" rel="noopener noreferrer">Watch the video on YouTube</a>
 </section>
-<section id="mathematics">
-<h2>Mathematics &amp; Puzzles</h2>
-<p>Mathematics is much more than rules and calculations. It is a subject full of surprises, intriguing questions and elegant ideas.</p>
-<div class="cards">
-<article><h3>Mathematical Curiosities</h3><p>Unexpected results, paradoxes and questions that challenge familiar assumptions.</p></article>
-<article><h3>Educational Resources</h3><p>Mathematics explanations, learning materials and resources for students and teachers.</p></article>
-<article><h3>Puzzles &amp; Problems</h3><p>Problems to investigate, discuss and enjoy.</p></article>
+<div class="illustration" aria-label="Illustration of the missing dollar puzzle"><div><div class="equation">$30 − $29 = $1?</div><p>One missing dollar. One very good question.</p></div></div>
 </div>
-</section>
-<section id="books">
-<h2>Books &amp; Stories</h2>
-<p>My writing ranges from humorous classroom adventures to curious tales and reflections on everyday life.</p>
-<div class="cards">
-<article><h3>An Anthology of School Yarns</h3><p>Stories inspired by the memorable and amusing side of school life.</p></article>
-<article><h3>Looking at Life Sideways</h3><p>Twenty stories exploring life from a slightly different angle.</p></article>
-<article><h3>25 Curious Tales</h3><p>A collection of stories for readers who enjoy the unusual and unexpected.</p></article>
-<article><h3>Taking the Scenic Route</h3><p>Reflections and observations along life's less predictable paths.</p></article>
+<h2 class="section-title" id="mathematics">Mathematics & Puzzles</h2>
+<div class="grid">
+<article class="card"><div class="symbol" aria-hidden="true">∞</div><h3>Mathematical Curiosities</h3><p>Questions that appear simple but lead to surprisingly interesting mathematical ideas.</p><p class="note">Featured topics and article links will be added here.</p></article>
+<article class="card"><div class="symbol" aria-hidden="true">π</div><h3>Educational Resources</h3><p>Ideas and explanations drawn from many years in the mathematics classroom.</p><p class="note">Resources and worksheets can be added as they become available.</p></article>
+<article class="card"><div class="symbol" aria-hidden="true">?</div><h3>Puzzles & Problems</h3><p>Problems to explore, discuss and sometimes argue about — preferably with a smile.</p><p class="note">A collection of favourite puzzles is coming soon.</p></article>
 </div>
-<p>Links to individual book listings will be added soon.</p>
-</section>
-<section id="videos">
-<h2>PhiloMathematica on YouTube</h2>
-<p>Explore mathematics, puzzles, explanations and stories on my YouTube channel.</p>
-<a class="button" href="https://www.youtube.com/results?search_query=PhiloMathematica" target="_blank" rel="noopener noreferrer">Find PhiloMathematica on YouTube</a>
-</section>
+<h2 class="section-title" id="books">Books</h2>
+<section class="card"><span class="tag">Published writing</span><h3>Stories to read and revisit</h3><p>My books bring together classroom yarns, curious tales, humour and reflections on everyday life.</p><p>Titles include <em>An Anthology of School Yarns</em>, <em>25 Curious Tales</em>, <em>Looking at Life Sideways</em> and <em>Taking the Scenic Route</em>.</p><p class="note">Book covers and direct Amazon links will be added after they have been checked.</p></section>
+<h2 class="section-title" id="stories">Stories & Reflections</h2>
+<section class="card"><h3>Looking at life from a different angle</h3><p>Alongside mathematics, I enjoy writing about the small absurdities, unexpected discoveries and memorable moments of ordinary life.</p><p>Selected stories from Medium will appear here, organised by theme, with links to read the full articles.</p></section>
+<h2 class="section-title" id="videos">YouTube</h2>
+<section class="card"><h3>PhiloMathematica on YouTube</h3><p>Explore mathematical ideas, classroom stories and puzzles in video form.</p><a class="button" href="https://www.youtube.com/results?search_query=PhiloMathematica" target="_blank" rel="noopener noreferrer">Find PhiloMathematica on YouTube</a><p class="note">We can replace this search link with your exact channel address later.</p></section>
 </main>
-<footer>
-<p>PhiloMathematica | George Dimitriadis</p>
-<p>Mathematics is never quite as straightforward as it seems.</p>
-</footer>
+<footer><strong>PhiloMathematica</strong><div>Mathematics, stories and the pleasure of curiosity</div><small>© 2026 George Dimitriadis</small></footer>
 </body>
 </html>
