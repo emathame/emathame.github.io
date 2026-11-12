@@ -51,46 +51,125 @@ main{max-width:1060px;margin:auto;padding:35px 20px 60px}.intro{background:white
 <article class="card"><div class="symbol" aria-hidden="true">?</div><h3>Puzzles & Problems</h3><p>Problems to explore, discuss and sometimes argue about — preferably with a smile.</p><p class="note">A collection of favourite puzzles is coming soon.</p></article>
 </div>
 
+
 <h2 class="section-title" id="books">Books</h2>
 
-<div class="books-gallery" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:20px 0 35px">
+<style>
+.books-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0 35px;
+}
 
-<article class="card" style="text-align:center;min-width:0">
-<img src="ChatGPT Image Nov 12, 2026, 05_30_03 PM.png" alt="The Jimmy Files" style="width:100%;max-width:180px;border-radius:6px">
+.books-gallery .book-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  box-shadow: 0 5px 20px #152a4412;
+}
+
+.books-gallery img {
+  width: 100%;
+  max-width: 170px;
+  height: 240px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.books-gallery h3 {
+  font-size: 17px;
+  line-height: 1.35;
+  margin: 16px 0 10px;
+}
+
+.books-gallery p {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 20px;
+}
+
+.books-gallery .book-button {
+  display: inline-block;
+  margin-top: auto;
+  background: #235e9c;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.books-gallery .book-button:hover {
+  background: #163f6b;
+}
+
+@media (max-width: 1000px) {
+  .books-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .books-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .books-gallery {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<div class="books-gallery">
+
+<article class="book-card">
+<img src="ChatGPT Image Nov 12, 2026, 05_30_03 PM.png" alt="The Jimmy Files">
 <h3>The Jimmy Files</h3>
 <p>Mathematical disasters, classroom humour and surprising puzzles from Room E.</p>
-<a class="button" href="https://www.amazon.com/dp/B0H2VSJZYQ" target="_blank" rel="noopener">View on Amazon</a>
+<a class="book-button" href="https://www.amazon.com/dp/B0H2VSJZYQ" target="_blank" rel="noopener noreferrer">View on Amazon</a>
 </article>
 
-<article class="card" style="text-align:center;min-width:0">
-<img src="ChatGPT Image Nov 12, 2026, 05_29_29 PM.png" alt="An Anthology of School Yarns" style="width:100%;max-width:180px;border-radius:6px">
+<article class="book-card">
+<img src="ChatGPT Image Nov 12, 2026, 05_29_29 PM.png" alt="An Anthology of School Yarns">
 <h3>An Anthology of School Yarns</h3>
 <p>Funny, strange and memorable stories from a teacher's life.</p>
-<a class="button" href="https://www.amazon.com/dp/B078YFLGYN" target="_blank" rel="noopener">View on Amazon</a>
+<a class="book-button" href="https://www.amazon.com/dp/B078YFLGYN" target="_blank" rel="noopener noreferrer">View on Amazon</a>
 </article>
 
-<article class="card" style="text-align:center;min-width:0">
-<img src="p1.png" alt="25 Curious Tales" style="width:100%;max-width:180px;border-radius:6px">
+<article class="book-card">
+<img src="p1.png" alt="25 Curious Tales">
 <h3>25 Curious Tales</h3>
 <p>Humorous observations, curious questions and the unexpected side of everyday life.</p>
-<a class="button" href="https://www.amazon.com/dp/B0H61QR4X9" target="_blank" rel="noopener">View on Amazon</a>
+<a class="book-button" href="https://www.amazon.com/dp/B0H61QR4X9" target="_blank" rel="noopener noreferrer">View on Amazon</a>
 </article>
 
-<article class="card" style="text-align:center;min-width:0">
-<img src="ChatGPT Image Nov 12, 2026, 05_29_43 PM.jpg" alt="Looking at Life Sideways" style="width:100%;max-width:180px;border-radius:6px">
+<article class="book-card">
+<img src="ChatGPT Image Nov 12, 2026, 05_29_43 PM.jpg" alt="Looking at Life Sideways">
 <h3>Looking at Life Sideways</h3>
 <p>Humour, imagination and observations on the unexpected.</p>
-<a class="button" href="https://www.amazon.com/dp/B0H8LRGJ5G" target="_blank" rel="noopener">View on Amazon</a>
+<a class="book-button" href="https://www.amazon.com/dp/B0H8LRGJ5G" target="_blank" rel="noopener noreferrer">View on Amazon</a>
 </article>
 
-<article class="card" style="text-align:center;min-width:0">
-<img src="ChatGPT Image Nov 12, 2026, 05_29_54 PM.jpg" alt="Taking the Scenic Route" style="width:100%;max-width:180px;border-radius:6px">
+<article class="book-card">
+<img src="ChatGPT Image Nov 12, 2026, 05_29_54 PM.jpg" alt="Taking the Scenic Route">
 <h3>Taking the Scenic Route</h3>
 <p>Reflections on people, possessions and a changing world.</p>
-<p>Available on Amazon</p>
+<a class="book-button" href="https://www.amazon.com/dp/B0HM9SN2K8" target="_blank" rel="noopener noreferrer">View on Amazon</a>
 </article>
 
 </div>
+
 
 
 </div>
