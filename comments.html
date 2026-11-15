@@ -99,13 +99,65 @@
       are particularly appreciated.
     </p>
 
-    <div class="notice">
-      <strong>Comments section coming soon</strong>
-      <p>
-        A moderated comments facility will be added here.
-        Comments will be reviewed before publication.
-      </p>
-    </div>
+    
+<h3>Leave a Comment or Suggestion</h3>
+
+<p>
+  Your comments are welcome. All submissions are
+  reviewed privately before any are published.
+</p>
+
+<form action="https://formspree.io/f/xrpqplnl"
+      method="POST">
+
+  <label for="visitor-name">Your name:</label>
+  <input type="text"
+         id="visitor-name"
+         name="name"
+         placeholder="Your name (optional)"
+         style="width:100%;padding:12px;margin:8px 0 18px;">
+
+  <label for="visitor-email">Your email (optional):</label>
+  <input type="email"
+         id="visitor-email"
+         name="email"
+         placeholder="Your email address"
+         style="width:100%;padding:12px;margin:8px 0 18px;">
+
+  <label for="subject">Subject:</label>
+  <select id="subject" name="subject"
+          style="width:100%;padding:12px;margin:8px 0 18px;">
+    <option>General website feedback</option>
+    <option>Mathematics Task Generator</option>
+    <option>Stories and articles</option>
+    <option>YouTube videos</option>
+    <option>Books</option>
+    <option>Other</option>
+  </select>
+
+  <label for="comment">Your comment:</label>
+  <textarea id="comment"
+            name="message"
+            rows="6"
+            required
+            style="width:100%;padding:12px;margin:8px 0 18px;"
+            placeholder="Write your comment or suggestion here..."></textarea>
+
+  <button type="submit"
+          style="background:#203b5d;color:white;
+                 padding:12px 24px;border:0;
+                 border-radius:6px;cursor:pointer;">
+    Submit Comment
+  </button>
+
+</form>
+
+<p style="font-size:0.9em;color:#63758a;">
+  Your comment will be sent privately for review.
+  Your email address will not be published.
+  Approved comments may appear on this website.
+</p>
+
   </section>
 </main>
 
