@@ -7,4 +7,43 @@ function solve(prefix,budget=250000){let p=[...prefix],used=new Uint8Array(size*
 function findTour(prefix){let found=solve(prefix);if(found)return found;return null}function startSolution(){stop();hintCell=-1;let result=null;if(path.length)result=findTour(path);if(!result){for(let k=0;k<Math.min(32,size*size);k++){const start=(k*17+Math.floor(size*size/2))%(size*size);result=findTour([start]);if(result)break}}if(!result){say('A complete tour could not be found. Try New Game.','error');return}solution=result;step=0;path=[];say('Solution ready. Click Next Step or Play Tour to watch the knight move.');render()}
 function advance(){if(step>=solution.length){stop();return}path=solution.slice(0,++step);hintCell=-1;if(step===solution.length){stop();say(`Complete tour: all ${size*size} squares visited!`,'success')}else say(`Solution step ${step} of ${solution.length}.`);render()}
 document.getElementById('levels').addEventListener('click',e=>{const b=e.target.closest('[data-size]');if(b)setSize(Number(b.dataset.size))});document.getElementById('new').onclick=()=>setSize(size);document.getElementById('undo').onclick=()=>{if(path.length&&!solution.length){path.pop();hintCell=-1;say(path.length?'Move undone.':'Choose a starting square.');render()}};document.getElementById('hint').onclick=()=>{if(solution.length){say('Exit the solution demonstration with New Game to play yourself.');return}if(!path.length){say('First choose a starting square.');return}const found=findTour(path);if(found&&found.length>path.length){hintCell=found[path.length];say('The highlighted square is a suggested next move.');render()}else if(path.length===size*size)say('You have already completed the tour!','success');else say('No complete continuation was found from here. Try Undo Move.','error')};document.getElementById('solution').onclick=startSolution;document.getElementById('next').onclick=advance;document.getElementById('auto').onclick=()=>{if(!solution.length||playing)return;playing=true;document.getElementById('auto').hidden=true;document.getElementById('stop').hidden=false;timer=setInterval(()=>{if(step<solution.length)advance();else stop()},350)};document.getElementById('stop').onclick=()=>{stop();render()};setSize(8)})();
-</script></body></html>
+</script>
+  <section style="max-width:840px;margin:30px auto;padding:24px;background:white;border-radius:16px;line-height:1.7;color:#193046">
+  <h2>The Mathematics Behind This Puzzle</h2>
+
+  <p>The Knight's Tour is a classical mathematical problem in which a knight must visit every square of a chessboard exactly once, using only legal knight moves.</p>
+
+  <h3>What does graph theory tell us?</h3>
+
+  <p>We can represent the chessboard as a graph. Each square becomes a vertex, and two vertices are connected by an edge whenever a knight can move directly between those squares.</p>
+
+  <p>A complete knight's tour is therefore a Hamiltonian path: a path that visits every vertex of a graph exactly once.</p>
+
+  <h3>Open and closed tours</h3>
+
+  <p>An open tour visits every square exactly once but does not finish a knight's move away from its starting square.</p>
+
+  <p>A closed tour also visits every square exactly once, but the knight can return to its starting square in one additional move. In graph theory, this corresponds to a Hamiltonian cycle.</p>
+
+  <h3>Warnsdorff's rule</h3>
+
+  <p>One useful strategy is to move the knight to the unvisited square that has the fewest onward moves available.</p>
+
+  <p>This is known as Warnsdorff's rule. The idea is to visit the most restricted squares early, rather than leaving them until they become impossible to reach.</p>
+
+  <p>Although the rule is remarkably effective, it does not guarantee success in every situation without additional choices or backtracking.</p>
+
+  <h3>Why does board size matter?</h3>
+
+  <p>The number and arrangement of squares affect whether a complete tour is possible. Some boards admit open tours but not closed tours.</p>
+
+  <p>For example, a 5 × 5 board admits open knight's tours, but no closed tour is possible.</p>
+
+  <h3>A mathematical challenge</h3>
+
+  <p>Can you explain why a closed knight's tour is impossible on any square chessboard with an odd number of squares?</p>
+
+  <p>Hint: A knight always moves from a light square to a dark square, or vice versa. Think about what happens when the knight returns to its starting square.</p>
+</section>
+
+</body></html>
