@@ -22,4 +22,54 @@ function showSolution(){stop();solution=solve(state);solutionIndex=0;if(!solutio
 function updateSolution(){if(!solution)return;let s=state;let lines=[];for(let i=0;i<solution.length;i++){lines.push((i+1)+'. '+stepDescription(s,solution[i]));s=solution[i].next}$('solution').textContent='Shortest continuation: '+solution.length+' crossing(s).\n'+lines.join('\n');$('solution').style.whiteSpace='pre-line';$('next').textContent=solutionIndex>=solution.length?'Replay Solution':'Next Step →';$('play').textContent=timer?'Pause':'Play Solution'}
 function nextStep(){if(!solution)return;if(solutionIndex>=solution.length){solutionIndex=0;return}let step=solution[solutionIndex];history.push({s:state,steps});state={side:step.next.side,people:[...step.next.people]};steps++;solutionIndex++;selected=[];render();updateSolution();if(solutionIndex===solution.length){stop();say('Solution complete!')}else say('Solution step '+solutionIndex+' of '+solution.length)}
 $('classic').onclick=()=>setup('classic');$('challenge').onclick=()=>setup('challenge');$('cross').onclick=cross;$('reset').onclick=reset;$('undo').onclick=()=>{stop();if(!history.length)return;let old=history.pop();state=old.s;steps=old.steps;selected=[];clearSolution();render();say('Last crossing undone.')};$('hint').onclick=()=>{let path=solve(state);if(!path){say('No safe solution from here. Undo a move or reset.');return}if(!path.length){say('You have already solved the puzzle!');return}let s=stepDescription(state,path[0]);say('Hint: '+s)};$('show').onclick=showSolution;$('next').onclick=nextStep;$('play').onclick=()=>{if(timer){stop();updateSolution();return}if(!solution)return;if(solutionIndex>=solution.length)solutionIndex=0;timer=setInterval(()=>{if(solutionIndex>=solution.length){stop();updateSolution();return}nextStep()},1100);updateSolution()};setup('classic')})();
-</script></body></html>
+</script>
+<script>
+(() => {
+  const heading = Array.from(document.querySelectorAll('h3'))
+    .find(h => h.textContent.trim() === 'A mathematical challenge');
+
+  if (!heading) return;
+
+  const question = heading.nextElementSibling;
+  const details = question.nextElementSibling;
+
+  if (!question || !details || details.tagName !== 'DETAILS') return;
+
+  const standard = {
+    question: 'Why does the farmer, wolf, goat and cabbage puzzle require at least seven crossings?',
+    answer: `
+      <p>The goat must cross first, since leaving the wolf with the goat or the goat with the cabbage is unsafe.</p>
+      <p>The farmer returns alone, takes the wolf across, and brings the goat back. The farmer then takes the cabbage across, returns alone, and finally takes the goat across.</p>
+      <p>This requires seven crossings. To establish that fewer are impossible, we can examine all legal states using breadth-first search. The shortest path to the goal has seven crossings.</p>`
+  };
+
+  const challenge = {
+    question: 'Why does the Missionaries and Cannibals puzzle require at least eleven crossings?',
+    answer: `
+      <p>The boat carries at most two people and must have at least one passenger. On either bank, cannibals must never outnumber missionaries when missionaries are present.</p>
+      <p>These restrictions force several return journeys. Moving everyone across in fewer crossings is impossible.</p>
+      <p>We can prove the minimum by representing each safe arrangement as a state and using breadth-first search to explore all legal crossings. The first solution is reached after eleven crossings.</p>`
+  };
+
+  function updateExplanation() {
+    const challengeSelected =
+      document.getElementById('challenge')?.classList.contains('active');
+
+    const content = challengeSelected ? challenge : standard;
+
+    question.textContent = content.question;
+    details.innerHTML =
+      '<summary>Show Explanation</summary>' + content.answer;
+    details.open = false;
+  }
+
+  document.getElementById('classic')
+    ?.addEventListener('click', updateExplanation);
+
+  document.getElementById('challenge')
+    ?.addEventListener('click', updateExplanation);
+
+  updateExplanation();
+})();
+</script>
+</body></html>
