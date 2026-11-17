@@ -118,9 +118,26 @@ function updateExplanation() {
     details.open = false;
   }
 
-  buttons.filter(b =>
-    /Easy|Standard|Challenge|Expert/i.test(b.textContent)
-  ).forEach(b => b.addEventListener('click', updateExplanation));
+buttons.filter(b =>
+  /Easy|Standard|Challenge|Expert/i.test(b.textContent)
+).forEach(b => {
+  b.addEventListener('click', () => {
+    const label = b.textContent;
+    let index = 0;
+
+    if (/Standard/i.test(label)) index = 1;
+    if (/Challenge/i.test(label)) index = 2;
+    if (/Expert/i.test(label)) index = 3;
+
+    question.textContent = challenges[index].question;
+    details.innerHTML =
+      '<summary>Show Explanation</summary>' +
+      challenges[index].answer;
+    details.open = false;
+  });
+});
+
+ 
 
   updateExplanation();
 })();
