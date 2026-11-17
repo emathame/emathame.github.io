@@ -45,4 +45,37 @@ document.getElementById('random').onclick=()=>{let index=Math.floor(Math.random(
 draw();
 })();
 </script>
+
+<section style="max-width:840px;margin:30px auto;padding:24px;background:white;border-radius:16px;line-height:1.7;color:#193046">
+  <h2>The Mathematics Behind This Puzzle</h2>
+
+  <p>The Eight Queens Puzzle asks us to place eight queens on a chessboard so that no two queens attack one another.</p>
+
+  <p>Since a queen can move horizontally, vertically and diagonally, a valid arrangement must contain exactly one queen in each row and each column, with no two queens sharing a diagonal.</p>
+
+  <h3>Why are there 92 solutions?</h3>
+
+  <p>If we place exactly one queen in each row and column, there are initially 8! = 40,320 possible arrangements.</p>
+
+  <p>However, most of these arrangements contain queens that attack one another diagonally. Eliminating these leaves exactly 92 valid solutions.</p>
+
+  <h3>Why only 12 fundamental solutions?</h3>
+
+  <p>Some solutions can be obtained from others by rotating or reflecting the chessboard.</p>
+
+  <p>A square has eight possible symmetry operations: four rotations (including the identity) and four reflections.</p>
+
+  <p>When solutions related by these operations are considered equivalent, the 92 arrangements fall into just 12 groups, called fundamental solutions.</p>
+
+  <p>Eleven fundamental solutions generate eight distinct arrangements each. One generates only four because it has a rotational symmetry.</p>
+
+  <p>Thus, 11 × 8 + 1 × 4 = 92.</p>
+
+  <h3>A mathematical challenge</h3>
+
+  <p>Can you find the solution that remains unchanged when the chessboard is rotated through 180 degrees?</p>
+
+  <p>Hint: Among the 12 fundamental solutions, exactly one has this property.</p>
+</section>
+
 </body></html>
