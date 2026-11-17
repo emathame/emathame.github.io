@@ -23,6 +23,15 @@
   <h3>A mathematical challenge</h3>
 
   <p>Start with the completed 15-puzzle and interchange just tiles 14 and 15, leaving everything else unchanged. Can you explain why this arrangement cannot be solved using legal moves?</p>
+
+<details style="margin-top:20px;padding:16px;background:#eef3f8;border-radius:10px">
+  <summary style="cursor:pointer;font-weight:bold;color:#193046">
+    Show Explanation
+  </summary>
+  <p>Swapping tiles 14 and 15 changes the parity of the permutation, increasing or decreasing the inversion count by one.</p>
+  <p>For a 4 × 4 puzzle, the sum of the inversion count and the empty square's row number, counted from the bottom, must be odd.</p>
+  <p>Interchanging tiles 14 and 15 while leaving the empty square unchanged makes this sum even. Therefore, the arrangement cannot be solved by legal sliding moves.</p>
+</details>
 </section>
 
 </body></html>
