@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eight Queens Puzzle | emathame</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#193046;background:#f3f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:900px;margin:auto;padding:24px 16px 50px}a{color:#17639c}.back{display:inline-block;margin-bottom:18px;font-weight:700;text-decoration:none;color:#193046}header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}header strong{font-size:14px}h1{font-size:clamp(28px,5vw,42px);margin:14px 0 6px}p{color:#516e87;line-height:1.5}.panel{background:#fff;border-radius:20px;padding:clamp(16px,3vw,28px);box-shadow:0 12px 34px #1a3a5612}.stats{display:flex;justify-content:space-between;max-width:520px;margin:0 auto 12px;font-weight:700}.board{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,520px);aspect-ratio:1;margin:auto;border:7px solid #23445f;border-radius:10px;overflow:hidden}.square{border:0;border-radius:0;display:grid;place-items:center;cursor:pointer;font-size:clamp(21px,5.8vw,45px);line-height:1;position:relative;padding:0;color:#142d41}.light{background:#f1d69d}.dark{background:#8ba6ae}.square.conflict{background:#f07875}.square.hint{outline:5px solid #f5b932;outline-offset:-5px}.square:focus-visible{outline:4px solid #1167aa;outline-offset:-4px;z-index:2}.square:hover{filter:brightness(1.08)}.buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:20px 0 10px}button.action{font:inherit;font-weight:700;padding:11px 15px;border-radius:10px;border:0;cursor:pointer;background:#e8eef5;color:#193046}button.primary{background:#17649d;color:#fff}button.action:hover{filter:brightness(.95)}#status{min-height:44px;text-align:center;font-weight:650;color:#23445f;margin:14px auto;max-width:560px}#status.good{color:#18764b}#status.bad{color:#a3322a}.note{text-align:center;font-size:14px}footer{text-align:center;color:#8ba0b7;font-size:13px;margin-top:28px}@media(max-width:450px){.wrap{padding:15px 10px}.panel{padding:12px}.board{border-width:4px}.buttons{gap:7px}button.action{font-size:13px;padding:10px}}
+</style>
+</head>
+<body><div class="wrap">
+<a class="back" href="interactive-games.html">← Back to Interactive Games</a>
+<header><strong>emathame · Interactive Games</strong><a href="index.html">Back to website</a></header>
+<h1>Eight Queens Puzzle</h1><p>Place eight queens on the chessboard so that no two queens share a row, column or diagonal.</p>
+<main class="panel"><div class="stats"><span>Queens placed: <span id="count">0</span> / 8</span><span id="conflicts">No conflicts</span></div>
+<div class="board" id="board" role="group" aria-label="Eight by eight chessboard"></div>
+<div id="status" role="status" aria-live="polite">Click a square to place a queen. Click it again to remove her.</div>
+<div class="buttons"><button class="action primary" id="check">Check Solution</button><button class="action" id="clear">Clear Board</button><button class="action" id="hint">Hint</button><button class="action" id="show">Show Solution</button></div>
+<p class="note">Red squares show queens that attack one another. A hint highlights a safe square when one is available.</p></main>
+<footer>© emathame · Mathematical games and puzzles</footer>
+</div>
+<script>
+(()=>{'use strict';
+const board=document.getElementById('board'),count=document.getElementById('count'),conflicts=document.getElementById('conflicts'),status=document.getElementById('status');
+let queens=new Set(),hintCell=-1;
+const row=i=>Math.floor(i/8),col=i=>i%8;
+const attacks=(a,b)=>row(a)===row(b)||col(a)===col(b)||Math.abs(row(a)-row(b))===Math.abs(col(a)-col(b));
+function conflictsSet(){let bad=new Set(),a=[...queens];for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++)if(attacks(a[i],a[j])){bad.add(a[i]);bad.add(a[j])}return bad}
+function message(s,cls=''){status.textContent=s;status.className=cls}
+function draw(){const bad=conflictsSet();board.replaceChildren();for(let i=0;i<64;i++){const b=document.createElement('button');b.type='button';b.className='square '+((row(i)+col(i))%2?'dark':'light')+(bad.has(i)?' conflict':'')+(hintCell===i?' hint':'');b.setAttribute('aria-label',`Row ${row(i)+1}, column ${col(i)+1}${queens.has(i)?', queen':''}${bad.has(i)?', conflict':''}`);b.setAttribute('aria-pressed',String(queens.has(i)));b.textContent=queens.has(i)?'♛':'';b.addEventListener('click',()=>{if(queens.has(i))queens.delete(i);else if(queens.size<8)queens.add(i);else{message('Eight queens are already placed. Remove one to move it.');return}hintCell=-1;draw();if(queens.size===8&&conflictsSet().size===0)message('Congratulations! All eight queens are safely placed.','good');else message('Click a square to place or remove a queen.')});board.appendChild(b)}count.textContent=queens.size;conflicts.textContent=bad.size?`${bad.size} queens in conflict`:'No conflicts';conflicts.style.color=bad.size?'#a3322a':'#18764b'}
+function solve(fixed=[]){const occupied=new Set(fixed),fixedRows=new Map();for(const i of fixed){if(fixedRows.has(row(i)))return null;fixedRows.set(row(i),col(i))}for(let a=0;a<fixed.length;a++)for(let b=a+1;b<fixed.length;b++)if(attacks(fixed[a],fixed[b]))return null;const selected=[];function backtrack(r){if(r===8)return true;const cols=fixedRows.has(r)?[fixedRows.get(r)]:[0,1,2,3,4,5,6,7];for(const c of cols){const i=r*8+c;if(selected.some(j=>attacks(i,j)))continue;selected.push(i);if(backtrack(r+1))return true;selected.pop()}return false}return backtrack(0)?selected:null}
+document.getElementById('check').onclick=()=>{const bad=conflictsSet();if(bad.size)message('Some queens attack one another. Move the queens on red squares.','bad');else if(queens.size<8)message(`No conflicts so far. Place ${8-queens.size} more queen${queens.size===7?'':'s'}.`);else message('Congratulations! You solved the Eight Queens Puzzle!','good')};
+document.getElementById('clear').onclick=()=>{queens.clear();hintCell=-1;draw();message('Board cleared. Try a new arrangement!')};
+document.getElementById('hint').onclick=()=>{hintCell=-1;const bad=conflictsSet();if(bad.size){draw();message('First remove or move a queen on a red square.','bad');return}if(queens.size===8){draw();message('All eight queens are already placed. Check your solution.');return}const solution=solve([...queens]);if(!solution){draw();message('This arrangement has no complete solution. Try moving one of your queens.');return}hintCell=solution.find(i=>!queens.has(i));draw();message('The gold outline shows one square where you can safely place your next queen.')};
+document.getElementById('show').onclick=()=>{const solution=solve([...queens])||solve();queens=new Set(solution);hintCell=-1;draw();message('Here is a complete solution. Press Clear Board to try it yourself.','good')};
+draw();
+})();
+</script>
+</body></html>
