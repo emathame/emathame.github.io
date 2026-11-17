@@ -44,6 +44,17 @@ document.getElementById('levels').addEventListener('click',e=>{const b=e.target.
   <p>Can you explain why a closed knight's tour is impossible on any square chessboard with an odd number of squares?</p>
 
   <p>Hint: A knight always moves from a light square to a dark square, or vice versa. Think about what happens when the knight returns to its starting square.</p>
+
+<details style="margin-top:20px;padding:16px;background:#eef3f8;border-radius:10px">
+  <summary style="cursor:pointer;font-weight:bold;color:#193046">
+    Show Explanation
+  </summary>
+  <p>Every knight move changes the colour of the square on which the knight stands.</p>
+  <p>To return to its starting square, a knight must therefore make an even number of moves.</p>
+  <p>A closed tour on an n × n board requires exactly n² moves, including the final move back to the starting square.</p>
+  <p>If n is odd, n² is also odd. But a knight cannot return to its starting square after an odd number of moves.</p>
+  <p>Therefore, a closed knight's tour is impossible on any odd-sized square board.</p>
+</details>
 </section>
 
 </body></html>
