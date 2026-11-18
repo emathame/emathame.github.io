@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guess My Number — Version 6</title><style>
+:root{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#eaf2ff;background:#091323}*{box-sizing:border-box}body{margin:0;padding:24px}.wrap{max-width:960px;margin:auto}h1{margin:0 0 7px;font-size:32px}.sub{color:#b3c9e5;margin:0 0 22px}.panel{background:#12233b;border:1px solid #2e4b70;border-radius:15px;padding:20px;margin:15px 0}button,select,input{font:inherit;border-radius:9px;padding:11px 14px}button{background:#2075b5;color:white;border:0;cursor:pointer;font-weight:650}button:hover:not(:disabled){background:#3192d9}button:disabled{opacity:.45;cursor:not-allowed}select,input{background:#08182b;color:white;border:1px solid #476386}input{width:100%;max-width:250px}.controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.field{display:flex;flex-direction:column;gap:7px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{background:#0a1a30;border-radius:10px;padding:12px;text-align:center}.stat strong{display:block;font-size:26px}.stat small{color:#a8c4e6}.candidate-count{display:block;margin-top:6px;color:#a8c4e6;font-size:13px}.clue{padding:13px 14px;margin:9px 0;border-left:4px solid #f0b84e;background:#0a1a30;border-radius:7px}.status{padding:13px;border-radius:9px;background:#1b3551;min-height:48px;margin-top:12px}.good{color:#82efb0}.bad{color:#ffc5b9}.muted{color:#a9bfd9}ol{padding-left:24px}li{margin:6px 0}.note{font-size:14px;color:#b1c5dc;line-height:1.6}@media(max-width:600px){body{padding:12px}.stats{gap:5px}.stat{padding:8px}.stat strong{font-size:22px}}
+</style></head><body><main class="wrap"><h1>🔎 Guess My Number</h1><p class="sub">A mathematical detective game — use clues and deduction to uncover the hidden number.</p><section class="panel"><div class="controls"><label class="field">Difficulty<select id="difficulty"><option value="2">Easy — 2 digits</option><option value="3" selected>Standard — 3 digits</option><option value="4">Challenge — 4 digits</option><option value="5">Expert — 5 digits</option></select></label><button id="newGame">New Game / Reset</button><button id="newNumber" type="button">New Number — Same Level</button></div><p class="note">Every puzzle has at least five clues. Each clue shows how many possible numbers remain. Your first clue is free. Each extra clue or incorrect guess costs one point. A correct guess wins the points you have left.</p></section><section class="panel"><div class="stats"><div class="stat"><small>Points remaining</small><strong id="points">10</strong></div><div class="stat"><small>Clues shown</small><strong id="count">0</strong></div><div class="stat"><small>Best score (this level)</small><strong id="best">—</strong></div></div><h2>Clues</h2><div id="clues"></div><button id="next">Reveal next clue (−1 point)</button><div class="controls" style="margin-top:22px"><label class="field">Your guess<input id="guess" inputmode="numeric" autocomplete="off" placeholder="Enter a number" maxlength="5"></label><button id="submit">Submit guess</button></div><div id="status" class="status" role="status">Choose New Game to begin.</div></section><section class="panel"><h2>Previous guesses</h2><ol id="history"></ol><p id="empty" class="muted">No guesses yet.</p></section></main><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);const starts={2:6,3:10,4:15,5:20};let game=null;const digits=n=>String(n).split('').map(Number);const count=(a,p)=>a.filter(p).length;const sum=a=>a.reduce((x,y)=>x+y,0);
+function makePredicates(target,len){const d=digits(target),s=sum(d),even=count(d,x=>x%2===0),odd=len-even,distinct=new Set(d).size,asc=d.every((x,i)=>i===0||d[i-1]<x),desc=d.every((x,i)=>i===0||d[i-1]>x),nondec=d.every((x,i)=>i===0||d[i-1]<=x),mult3=target%3===0;let arr=[];const add=(text,test)=>arr.push({text,test});
+add(`The sum of the digits is ${s}.`,n=>sum(digits(n))===s);
+add(`Exactly ${even} ${even===1?'digit is':'digits are'} even.`,n=>count(digits(n),x=>x%2===0)===even);
+add(`Exactly ${odd} ${odd===1?'digit is':'digits are'} odd.`,n=>count(digits(n),x=>x%2!==0)===odd);
+add(`There are ${distinct} different digits.`,n=>new Set(digits(n)).size===distinct);
+if(asc)add('The digits are in strictly ascending order.',n=>digits(n).every((x,i,a)=>i===0||a[i-1]<x));
+if(desc)add('The digits are in strictly descending order.',n=>digits(n).every((x,i,a)=>i===0||a[i-1]>x));
+if(!asc&&!desc&&nondec)add('The digits never decrease from left to right.',n=>digits(n).every((x,i,a)=>i===0||a[i-1]<=x));
+add(`The number is ${mult3?'':'not '}divisible by 3.`,n=>(n%3===0)===mult3);
+for(const k of [2,5,9,11]){let yes=target%k===0;add(`The number is ${yes?'':'not '}divisible by ${k}.`,n=>(n%k===0)===yes)}
+const middle=Math.floor((10**(len-1)+10**len-1)/2);if(target>middle){add(`The number is at least ${middle+1}.`,n=>n>=middle+1)}else{add(`The number is at most ${middle}.`,n=>n<=middle)}
+const largest=Math.max(...d),smallest=Math.min(...d);add(`The largest digit is ${largest}.`,n=>Math.max(...digits(n))===largest);add(`The smallest digit is ${smallest}.`,n=>Math.min(...digits(n))===smallest);
+const ord=['first','second','third','fourth','fifth'];
+for(let i=0;i<len;i++){
+ const v=d[i],place=ord[i];
+ add(`The ${place} digit is ${v%2===0?'even':'odd'}.`,n=>digits(n)[i]%2===v%2);
+ add(`The ${place} digit is ${v<5?'less than 5':'at least 5'}.`,n=>(digits(n)[i]<5)===(v<5));
+ if(v<=3)add(`The ${place} digit is at most 3.`,n=>digits(n)[i]<=3);
+ if(v>=7)add(`The ${place} digit is at least 7.`,n=>digits(n)[i]>=7);
+ if(i<len-1){const relation=v<d[i+1]?'less than':v>d[i+1]?'greater than':'equal to';add(`The ${place} digit is ${relation} the ${ord[i+1]} digit.`,n=>{let a=digits(n);return relation==='less than'?a[i]<a[i+1]:relation==='greater than'?a[i]>a[i+1]:a[i]===a[i+1]});}
+ add(`The ${place} digit is ${v}.`,n=>digits(n)[i]===v);
+}
+return arr;}
+function build(target,len){
+ const low=10**(len-1),high=10**len;
+ const all=Array.from({length:high-low},(_,i)=>low+i);
+ const pool=makePredicates(target,len).filter(c=>all.some(n=>!c.test(n)));
+ const isExact=c=>/^The (first|second|third|fourth|fifth) digit is [0-9]\.$/.test(c.text);
+ const isWeak=c=>/not divisible by (2|3|5|9|11)\./.test(c.text);
+ const isDuplicate=(a,b)=>{
+   if(a.text===b.text)return true;
+   if((/Exactly .*digits? (?:is|are) even/.test(a.text)&&/Exactly .*digits? (?:is|are) odd/.test(b.text))||
+      (/Exactly .*digits? (?:is|are) odd/.test(a.text)&&/Exactly .*digits? (?:is|are) even/.test(b.text)))return true;
+   return false;
+ };
+ let candidates=all,chosen=[],used=new Set();
+ // Keep early clues broadly informative, then narrow the candidate set.
+ for(let step=0;step<4;step++){
+   const opts=[];
+   for(let i=0;i<pool.length;i++){
+     if(used.has(i)||isExact(pool[i])||isWeak(pool[i])||chosen.some(c=>isDuplicate(c,pool[i])))continue;
+     const remaining=candidates.filter(pool[i].test);
+     if(remaining.length===candidates.length||remaining.length===0)continue;
+     opts.push({i,remaining});
+   }
+   if(!opts.length)break;
+   const multi=opts.filter(o=>o.remaining.length>1);
+   const available=multi.length?multi:opts;
+   // Prefer informative clues, but avoid giving away the solution immediately.
+   available.sort((a,b)=>{
+     const targetFraction=step===0?.40:step===1?.35:.30;
+     const ideal=Math.max(2,candidates.length*targetFraction);
+     return Math.abs(Math.log(a.remaining.length/ideal))-Math.abs(Math.log(b.remaining.length/ideal));
+   });
+   const pick=available[Math.floor(Math.random()*Math.min(3,available.length))];
+   used.add(pick.i);chosen.push(pool[pick.i]);candidates=pick.remaining;
+ }
+ // Narrow to exactly one solution, preferring mathematical clues over digit revelations.
+ while(candidates.length>1){
+   let opts=[];
+   for(let i=0;i<pool.length;i++){
+     if(used.has(i)||chosen.some(c=>isDuplicate(c,pool[i])))continue;
+     const remaining=candidates.filter(pool[i].test);
+     if(remaining.length===0||remaining.length===candidates.length)continue;
+     opts.push({i,remaining,exact:isExact(pool[i]),weak:isWeak(pool[i])});
+   }
+   if(!opts.length)throw Error('Unable to identify a unique number');
+   const preferred=opts.filter(o=>!o.exact&&!o.weak);
+   const fallback=opts.filter(o=>!o.exact);
+   const options=preferred.length?preferred:fallback.length?fallback:opts;
+   options.sort((a,b)=>a.remaining.length-b.remaining.length);
+   const pick=options[0];
+   used.add(pick.i);chosen.push(pool[pick.i]);candidates=pick.remaining;
+ }
+ // If uniqueness came early, include extra true clues, but do not present them
+ // as if they further reduced the set of possibilities.
+ if(chosen.length<5){
+   const extras=pool.map((c,i)=>({c,i})).filter(o=>!used.has(o.i)&&!isExact(o.c)&&!isWeak(o.c)&&!chosen.some(c=>isDuplicate(c,o.c)));
+   for(const item of extras){if(chosen.length>=5)break;chosen.push(item.c);used.add(item.i)}
+ }
+ if(chosen.length<5){for(let i=0;i<pool.length&&chosen.length<5;i++)if(!used.has(i)){chosen.push(pool[i]);used.add(i)}}
+ let possible=all;
+ const clues=chosen.map(c=>{possible=possible.filter(c.test);return {text:c.text,remaining:possible.length}});
+ if(possible.length!==1||possible[0]!==target)throw Error('Clue verification failed');
+ return clues;
+}
+function bestKey(){return 'guess-my-number-best-'+game.len}function saveBest(){try{let old=Number(localStorage.getItem(bestKey()))||0;if(game.points>old)localStorage.setItem(bestKey(),String(game.points));}catch(e){}}function readBest(){try{return localStorage.getItem(bestKey())||'—'}catch(e){return '—'}}
+function render(){if(!game)return;$('points').textContent=game.points;$('count').textContent=game.shown;$('best').textContent=readBest();$('clues').innerHTML='';game.clues.slice(0,game.shown).forEach((c,i)=>{let div=document.createElement('div');div.className='clue';div.textContent=`Clue ${i+1}: ${c.text}`;let info=document.createElement('small');info.className='candidate-count';info.textContent=`${c.remaining.toLocaleString()} possible ${c.remaining===1?'number':'numbers'} remain${c.remaining===1?'s':''} after this clue`;div.appendChild(info);$('clues').appendChild(div)});$('history').innerHTML='';game.guesses.forEach(g=>{let li=document.createElement('li');li.textContent=g+' — incorrect';$('history').appendChild(li)});$('empty').hidden=game.guesses.length>0;$('next').disabled=!game.active||game.shown>=game.clues.length||game.points<=0;$('submit').disabled=!game.active;$('guess').disabled=!game.active;$('guess').placeholder=`Enter ${game.len} digits`;$('next').textContent=game.shown>=game.clues.length?'All clues revealed':'Reveal next clue (−1 point)';}
+function start(){const len=Number($('difficulty').value);const target=10**(len-1)+Math.floor(Math.random()*9*10**(len-1));game={len,target,points:starts[len],clues:build(target,len),shown:1,guesses:[],active:true};$('guess').value='';$('status').textContent='New hidden number selected. Your first clue is free. Deduce the number, request another clue, or take a guess.';render();$('guess').focus();}
+function finish(win){game.active=false;if(win){saveBest();$('status').innerHTML=`<strong class="good">Correct! The number was ${game.target}. You earned ${game.points} points.</strong>`}else{$('status').innerHTML=`<strong class="bad">Game over. The hidden number was ${game.target}.</strong>`}render();}
+$('newGame').addEventListener('click',start);$('newNumber').addEventListener('click',start);$('next').addEventListener('click',()=>{if(!game||!game.active||game.shown>=game.clues.length||game.points<=0)return;game.points--;game.shown++;if(game.points===0){finish(false);return;}$('status').textContent='New clue revealed. Study the clues and make your guess.';render()});function guess(){if(!game||!game.active)return;let raw=$('guess').value.trim();if(!new RegExp(`^[1-9][0-9]{${game.len-1}}$`).test(raw)){$('status').textContent=`Enter a valid ${game.len}-digit number (no leading zero).`;return}let n=Number(raw);if(n===game.target){finish(true);return}if(game.guesses.includes(n)){$('status').textContent='You already tried that number. No additional point deducted.';return}game.guesses.push(n);game.points--;$('guess').value='';if(game.points<=0)finish(false);else{$('status').innerHTML=`<span class="bad">${n} is incorrect. One point deducted.</span>`;render();}}$('submit').addEventListener('click',guess);$('guess').addEventListener('keydown',e=>{if(e.key==='Enter')guess()});$('difficulty').addEventListener('change',start);start();})();
+</script></body></html>
