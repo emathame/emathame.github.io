@@ -77,24 +77,20 @@ selectLevel(0);
 
   const buttons = [...document.querySelectorAll('button')];
 
-  function updateExplanation() {
-   
+ 
 function updateExplanation() {
-  const levelButtons = buttons.filter(b =>
-    /Easy|Standard|Challenge|Expert/i.test(b.textContent)
-  );
-
-  const active = levelButtons.find(b =>
-    b.classList.contains('active') ||
-    b.getAttribute('aria-pressed') === 'true'
-  );
-
-  const label = active?.textContent || 'Easy';
+  const capacityA = document.getElementById('capA')?.textContent || '';
+  const capacityB = document.getElementById('capB')?.textContent || '';
 
   let index = 0;
-  if (/Standard/i.test(label)) index = 1;
-  if (/Challenge/i.test(label)) index = 2;
-  if (/Expert/i.test(label)) index = 3;
+
+  if (capacityA.includes('4 L') && capacityB.includes('7 L')) {
+    index = 1;
+  } else if (capacityA.includes('7 L') && capacityB.includes('11 L')) {
+    index = 2;
+  } else if (capacityA.includes('8 L') && capacityB.includes('13 L')) {
+    index = 3;
+  }
 
   question.textContent = challenges[index].question;
   details.innerHTML =
@@ -102,6 +98,7 @@ function updateExplanation() {
     challenges[index].answer;
   details.open = false;
 }
+
 
 
     const label = active?.textContent || 'Easy';
@@ -118,26 +115,16 @@ function updateExplanation() {
     details.open = false;
   }
 
-buttons.filter(b =>
-  /Easy|Standard|Challenge|Expert/i.test(b.textContent)
-).forEach(b => {
-  b.addEventListener('click', () => {
-    const label = b.textContent;
-    let index = 0;
 
-    if (/Standard/i.test(label)) index = 1;
-    if (/Challenge/i.test(label)) index = 2;
-    if (/Expert/i.test(label)) index = 3;
-
-    question.textContent = challenges[index].question;
-    details.innerHTML =
-      '<summary>Show Explanation</summary>' +
-      challenges[index].answer;
-    details.open = false;
-  });
-});
 
  
+document.getElementById('levels')
+  ?.addEventListener('click', (event) => {
+    if (event.target.closest('button')) {
+      updateExplanation();
+    }
+  });
+
 
   updateExplanation();
 })();
