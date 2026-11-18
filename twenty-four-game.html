@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The 24 Game | emathame</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#1b3048;background:#f3f6fa}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:940px;margin:auto;padding:25px 18px 45px}
+.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.top a{color:#185e99;font-weight:bold}
+h1{font-size:clamp(30px,5vw,43px);margin:14px 0}p{line-height:1.65;color:#526e8c}
+.panel,.math{background:#fff;border-radius:18px;padding:24px;margin-top:18px;box-shadow:0 10px 28px #183b5a0d}
+.levels,.actions,.keypad,.numbers,.stats{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+button{border:0;border-radius:10px;padding:12px 16px;font-size:15px;font-weight:700;background:#e7edf4;color:#193046;cursor:pointer}
+button:hover{filter:brightness(.96)}button:focus-visible,input:focus-visible{outline:3px solid #f0a833;outline-offset:2px}
+button.selected,.primary{background:#17669f;color:#fff}
+.numbers{justify-content:center;background:#f2f7fb;padding:20px;border-radius:14px}
+.number{display:grid;place-items:center;background:white;border:2px solid #b6d2e5;border-radius:14px;min-width:76px;height:88px;font-size:42px;font-weight:800;color:#17669f}
+.goal{text-align:center;font-size:22px;font-weight:800;margin:14px 0}.goal strong{font-size:35px;color:#17669f}
+.stats{justify-content:space-between;font-weight:700}
+input{width:100%;font-size:23px;padding:13px;border:2px solid #c7d6e5;border-radius:10px;color:#1b3048}
+.keypad button{min-width:55px;font-size:20px}.keypad button.digit{background:#d6e9f6}
+.message{min-height:50px;padding:12px 0;font-weight:700;color:#245879}.message.success{color:#087745}.message.error{color:#a14b0b}
+.help{display:none;background:#fff8e8;border-left:4px solid #eab448;padding:14px 16px;margin:12px 0;line-height:1.7}
+.help.visible{display:block}.math{line-height:1.7}.math p{color:#314c66}
+.math details{background:#edf3f8;padding:16px;border-radius:10px;margin-top:12px}.math summary{font-weight:700;cursor:pointer}
+footer{text-align:center;color:#7790a8;padding:22px}
+@media(max-width:560px){.panel,.math{padding:16px}.number{min-width:60px;height:72px;font-size:34px}.keypad button{flex:1 1 50px}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="top"><a href="interactive-games.html">← Back to Interactive Games</a><a href="index.html">Back to website</a></div>
+<h1>The 24 Game</h1>
+<p>Use each of the four numbers <strong>exactly once</strong> to make <strong>24</strong>. You may use +, −, ×, ÷ and brackets. You cannot join numbers together, introduce other numbers, or use powers, roots or factorials.</p>
+<main class="panel">
+<div id="levels" class="levels" aria-label="Difficulty level"></div>
+<div class="stats"><span id="progress">Solved: 0</span><span id="attempts">Attempts: 0</span></div>
+<div class="goal">Make exactly <strong>24</strong> using:</div>
+<div class="numbers" id="numbers" aria-label="Your four numbers"></div>
+<label for="expression"><strong>Your expression</strong></label>
+<input id="expression" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. (1 + 3) × (2 + 4)">
+<div class="keypad" id="keypad" aria-label="Expression buttons">
+<button data-key="+">+</button><button data-key="−">−</button><button data-key="×">×</button><button data-key="÷">÷</button>
+<button data-key="(">(</button><button data-key=")">)</button><button data-key="back">⌫</button><button data-key="clear">Clear</button>
+</div>
+<div class="actions">
+<button class="primary" id="check">Check Answer</button>
+<button id="hint">Hint</button><button id="solution">Show Solution</button><button id="new">New Puzzle</button>
+</div>
+<div id="message" class="message" aria-live="polite">Enter an expression and select Check Answer.</div>
+<div id="help" class="help"></div>
+<p style="font-size:13px">Any valid expression is accepted, not just the example solution. Calculations use exact fractions rather than rounded decimal values.</p>
+</main>
+<section class="math">
+<h2>The Mathematics Behind the 24 Game</h2>
+<p>This game develops <strong>number sense, order of operations, inverse operations and flexible mathematical thinking</strong>. Different expressions can give the same result, and brackets can completely change the value.</p>
+<h3 id="challengeTitle">A mathematical challenge</h3><p id="challengeQuestion"></p>
+<details id="challengeDetails"><summary>Show Explanation</summary><div id="challengeAnswer"></div></details>
+<h3>How does the computer check your answer?</h3>
+<p>The program parses your expression according to the usual order of operations and verifies that the four displayed numbers are used exactly once. It computes with fractions, so a result such as 23.999999 is never mistaken for 24.</p>
+</section>
+<footer>© emathame · Mathematical games and puzzles</footer>
+</div>
+<script>
+'use strict';
+const puzzles = {"Easy": [{"numbers": [1, 2, 3, 4], "solution": "(4×(3+(1+2)))"}, {"numbers": [2, 3, 4, 6], "solution": "((3−2)×(4×6))"}, {"numbers": [3, 3, 4, 6], "solution": "((3−3)+(4×6))"}, {"numbers": [2, 4, 4, 8], "solution": "((2+4)×(8−4))"}, {"numbers": [1, 3, 5, 6], "solution": "((1+5)+(3×6))"}, {"numbers": [2, 3, 5, 7], "solution": "((3×7)−(2−5))"}], "Standard": [{"numbers": [2, 2, 4, 4], "solution": "(4×((2×4)−2))"}, {"numbers": [1, 2, 4, 8], "solution": "(8×(4+(1−2)))"}, {"numbers": [2, 5, 7, 9], "solution": "((5×7)−(2+9))"}, {"numbers": [3, 4, 6, 9], "solution": "(4×(9+(3−6)))"}, {"numbers": [1, 3, 7, 8], "solution": "(8×(7−(1+3)))"}, {"numbers": [2, 4, 7, 8], "solution": "(4×((2×7)−8))"}], "Challenge": [{"numbers": [3, 3, 8, 8], "solution": "(8÷(3−(8÷3)))"}, {"numbers": [1, 5, 5, 5], "solution": "(5×(5−(1÷5)))"}, {"numbers": [1, 3, 4, 6], "solution": "(6÷(1−(3÷4)))"}, {"numbers": [1, 4, 5, 6], "solution": "(6÷((5÷4)−1))"}, {"numbers": [1, 2, 7, 7], "solution": "(((7×7)−1)÷2)"}]};
+const challenges = {
+ Easy:{q:'Using 1, 2, 3 and 4, can you make 24?',a:'<p><strong>4 × (3 + 2 + 1) = 24.</strong> First make 6 by adding 3, 2 and 1, then multiply by 4.</p>'},
+ Standard:{q:'Using 2, 5, 7 and 9, can you make 24?',a:'<p><strong>5 × 7 − (9 + 2) = 24.</strong> Multiply to make 35, then subtract 11. Notice how combining the numbers into two convenient groups simplifies the problem.</p>'},
+ Challenge:{q:'Using 3, 3, 8 and 8, can you make 24?',a:'<p><strong>8 ÷ (3 − 8 ÷ 3) = 24.</strong> The inner bracket is 3 − 8/3 = 1/3. Dividing 8 by 1/3 gives 24. Fractions are sometimes essential even when the target is a whole number.</p>'}
+};
+const el=id=>document.getElementById(id);
+let difficulty='Easy',current=null,solved=new Set(),attempts=0,helpStage=0;
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+function fraction(n,d=1){if(d===0)throw Error('Division by zero is not allowed.');if(d<0){n=-n;d=-d}const g=gcd(n,d);return [n/g,d/g]}
+function plus(a,b){return fraction(a[0]*b[1]+b[0]*a[1],a[1]*b[1])}
+function minus(a,b){return fraction(a[0]*b[1]-b[0]*a[1],a[1]*b[1])}
+function times(a,b){return fraction(a[0]*b[0],a[1]*b[1])}
+function divided(a,b){return fraction(a[0]*b[1],a[1]*b[0])}
+function evaluate(raw){
+ const s=raw.replace(/\s/g,'').replace(/[−–]/g,'-').replace(/[×*]/g,'*').replace(/÷/g,'/');
+ if(!s)throw Error('Enter an expression first.');
+ if(/[^0-9+\-*/()]/.test(s))throw Error('Use only the displayed numbers, +, −, ×, ÷ and brackets.');
+ let i=0;const used=[];
+ function primary(){
+  if(s[i]==='('){i++;const v=expression();if(s[i]!==')')throw Error('Check your brackets.');i++;return v}
+  if(/[0-9]/.test(s[i]||'')){
+   const start=i;while(/[0-9]/.test(s[i]||''))i++;
+   const value=Number(s.slice(start,i));used.push(value);return [value,1]
+  }
+  throw Error('Check the expression near position '+(i+1)+'.');
+ }
+ function unary(){if(s[i]==='+'){i++;return unary()}if(s[i]==='-'){i++;const v=unary();return [-v[0],v[1]]}return primary()}
+ function term(){let v=unary();while(s[i]==='*'||s[i]==='/'){const op=s[i++],b=unary();v=op==='*'?times(v,b):divided(v,b)}return v}
+ function expression(){let v=term();while(s[i]==='+'||s[i]==='-'){const op=s[i++],b=term();v=op==='+'?plus(v,b):minus(v,b)}return v}
+ const result=expression();
+ if(i!==s.length)throw Error('Check for missing operators or extra brackets.');
+ const expected=[...current.numbers].sort((a,b)=>a-b);
+ const actual=[...used].sort((a,b)=>a-b);
+ if(expected.length!==actual.length||expected.some((n,j)=>n!==actual[j]))throw Error('Use each of the four displayed numbers exactly once. Joining numbers is not allowed.');
+ return result;
+}
+function status(message,cls=''){el('message').textContent=message;el('message').className='message '+cls}
+function stats(){el('progress').textContent='Solved: '+solved.size+' / '+puzzles[difficulty].length;el('attempts').textContent='Attempts: '+attempts}
+function updateMath(){const c=challenges[difficulty];el('challengeQuestion').textContent=c.q;el('challengeAnswer').innerHTML=c.a;el('challengeDetails').open=false}
+function selectLevel(name){
+ difficulty=name;solved=new Set();attempts=0;current=null;
+ el('levels').innerHTML=Object.keys(puzzles).map(k=>`<button data-level="${k}" class="${k===name?'selected':''}" aria-pressed="${k===name}">${k}</button>`).join('');
+ updateMath();newPuzzle(true);
+}
+function newPuzzle(initial=false){
+ const arr=puzzles[difficulty],remaining=arr.filter(p=>!solved.has(p.numbers.join(','))&&p!==current);
+ const choices=remaining.length?remaining:arr.filter(p=>p!==current);
+ current=choices[Math.floor(Math.random()*choices.length)]||arr[0];
+ el('numbers').innerHTML=current.numbers.map(n=>`<div class="number">${n}</div>`).join('');
+ el('expression').value='';el('help').classList.remove('visible');el('help').textContent='';helpStage=0;
+ status(initial?'Enter an expression and select Check Answer.':'New puzzle! Use the four numbers to make 24.');
+ stats();
+}
+function check(){
+ attempts++;
+ try{
+  const v=evaluate(el('expression').value);
+  if(v[0]===24*v[1]){solved.add(current.numbers.join(','));status('Correct! Your expression equals 24. Well done!','success')}
+  else status('Your expression equals '+(v[1]===1?v[0]:v[0]+'/'+v[1])+', not 24. Try again.','error');
+ }catch(e){status(e.message,'error')}
+ stats();
+}
+function hint(){
+ helpStage++;const s=current.solution;
+ let msg;
+ if(helpStage===1)msg='Try combining two numbers to create a useful intermediate result. Brackets may help.';
+ else if(helpStage===2)msg='One solution uses these operations: '+[...new Set((s.match(/[+−×÷]/g)||[]))].join(', ')+'.';
+ else msg='Here is the structure of one solution: '+s.replace(/[0-9]+/g,'□')+'. Fill the boxes with the four numbers.';
+ el('help').textContent=msg;el('help').classList.add('visible');
+}
+function showSolution(){el('help').textContent='One correct solution: '+current.solution+' = 24. Other solutions may also work.';el('help').classList.add('visible')}
+el('levels').addEventListener('click',e=>{const b=e.target.closest('[data-level]');if(b)selectLevel(b.dataset.level)});
+el('check').addEventListener('click',check);
+el('hint').addEventListener('click',hint);
+el('solution').addEventListener('click',showSolution);
+el('new').addEventListener('click',()=>newPuzzle());
+el('expression').addEventListener('keydown',e=>{if(e.key==='Enter')check()});
+el('expression').addEventListener('input',()=>el('help').classList.remove('visible'));
+el('keypad').addEventListener('click',e=>{
+ const b=e.target.closest('[data-key]');if(!b)return;
+ const inp=el('expression'),k=b.dataset.key;
+ if(k==='clear')inp.value='';
+ else if(k==='back')inp.value=inp.value.slice(0,-1);
+ else inp.value+=k;
+ inp.focus();
+});
+selectLevel('Easy');
+</script></body></html>
