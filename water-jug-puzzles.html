@@ -28,104 +28,60 @@ selectLevel(0);
 (() => {
   const heading = [...document.querySelectorAll('h3')]
     .find(h => h.textContent.trim() === 'A mathematical challenge');
-
   if (!heading) return;
-
   const question = heading.nextElementSibling;
   const details = question?.nextElementSibling;
-
-  if (!question || !details || details.tagName !== 'DETAILS') return;
+  if (!question || details?.tagName !== 'DETAILS') return;
 
   const challenges = [
     {
       question: 'How can you measure exactly 4 litres using 3 L and 5 L jugs?',
-      answer: `
-        <p>Fill the 5 L jug and pour into the 3 L jug, leaving 2 L in the larger jug.</p>
-        <p>Empty the 3 L jug and transfer the remaining 2 L into it.</p>
-        <p>Fill the 5 L jug again, then pour 1 L into the 3 L jug to fill it.</p>
-        <p>Exactly 4 L remain in the 5 L jug. This takes six operations.</p>
-        <p>Since gcd(3,5) = 1, every whole-number quantity up to the larger capacity is theoretically measurable.</p>`
+      answer: `<p>1. Fill the 5 L jug and pour into the 3 L jug, leaving 2 L in the 5 L jug.</p>
+        <p>2. Empty the 3 L jug.</p>
+        <p>3. Pour the remaining 2 L from the 5 L jug into the 3 L jug.</p>
+        <p>4. Fill the 5 L jug again.</p>
+        <p>5. Pour 1 L into the 3 L jug to fill it, leaving exactly 4 L in the 5 L jug.</p>
+        <p>These are six operations: the first sentence includes two operations. Since gcd(3,5) = 1, every whole-number target up to 5 L is measurable.</p>`
     },
     {
       question: 'How can you measure exactly 2 litres using 4 L and 7 L jugs?',
-      answer: `
-        <p>Fill the 4 L jug and pour it into the 7 L jug.</p>
-        <p>Fill the 4 L jug again and pour into the 7 L jug until it is full. This leaves 1 L in the 4 L jug.</p>
-        <p>Empty the 7 L jug and transfer the remaining 1 L into it.</p>
-        <p>Fill the 4 L jug and pour it into the 7 L jug. There are now 5 L in the larger jug.</p>
-        <p>Fill the 4 L jug again and pour until the 7 L jug is full. Exactly 2 L remain in the 4 L jug.</p>
-        <p>Since gcd(4,7) = 1, measuring 2 L is possible.</p>`
+      answer: `<p>1. Fill the 4 L jug and pour it into the 7 L jug.</p>
+        <p>2. Fill the 4 L jug again, then pour into the 7 L jug until full; 1 L remains in the 4 L jug.</p>
+        <p>3. Empty the 7 L jug and transfer the remaining 1 L into it.</p>
+        <p>4. Fill the 4 L jug and pour it into the 7 L jug; it now contains 5 L.</p>
+        <p>5. Fill the 4 L jug again and pour until the 7 L jug is full. Exactly 2 L remains in the 4 L jug.</p>
+        <p>Since gcd(4,7) = 1, the target is measurable. Use Show Solution to compare this method with the shortest route.</p>`
     },
     {
       question: 'How can you measure exactly 6 litres using 7 L and 11 L jugs?',
-      answer: `
-        <p>The capacities 7 and 11 are relatively prime, since gcd(7,11) = 1.</p>
-        <p>This means whole-number quantities such as 6 L can be measured using filling, emptying and pouring operations.</p>
-        <p>One way to find the shortest sequence is to use breadth-first search, examining every legal state in increasing order of moves.</p>
-        <p>Try using Show Solution to investigate the sequence that produces exactly 6 L.</p>`
+      answer: `<p>Since gcd(7,11) = 1, it is possible to measure 6 L using legal filling, emptying and pouring operations.</p>
+        <p>Every state can be represented by a pair (a, b), recording the amount in each jug. Breadth-first search explores these states in order of increasing moves and finds a shortest route to a state containing 6 L.</p>
+        <p>Select Show Solution above to see the actual sequence of operations.</p>`
     },
     {
       question: 'How can you measure exactly 1 litre using 8 L and 13 L jugs?',
-      answer: `
-        <p>The Euclidean algorithm gives:</p>
-        <p>13 = 8 + 5, 8 = 5 + 3, 5 = 3 + 2, 3 = 2 + 1.</p>
-        <p>Therefore gcd(8,13) = 1.</p>
-        <p>By repeatedly filling, emptying and transferring water, we can produce quantities corresponding to differences between multiples of 8 and 13.</p>
-        <p>Eventually, exactly 1 L can be obtained. Use Show Solution to see a sequence of legal operations.</p>`
+      answer: `<p>The Euclidean algorithm gives 13 = 8 + 5, 8 = 5 + 3, 5 = 3 + 2, and 3 = 2 + 1. Therefore gcd(8,13) = 1.</p>
+        <p>Repeated filling, emptying and pouring can create differences between multiples of 8 and 13, eventually leaving exactly 1 L in a jug.</p>
+        <p>Select Show Solution above to follow a shortest sequence of legal operations.</p>`
     }
   ];
 
-  const buttons = [...document.querySelectorAll('button')];
-
- 
-function updateExplanation() {
-  const capacityA = document.getElementById('capA')?.textContent || '';
-  const capacityB = document.getElementById('capB')?.textContent || '';
-
-  let index = 0;
-
-  if (capacityA.includes('4 L') && capacityB.includes('7 L')) {
-    index = 1;
-  } else if (capacityA.includes('7 L') && capacityB.includes('11 L')) {
-    index = 2;
-  } else if (capacityA.includes('8 L') && capacityB.includes('13 L')) {
-    index = 3;
-  }
-
-  question.textContent = challenges[index].question;
-  details.innerHTML =
-    '<summary>Show Explanation</summary>' +
-    challenges[index].answer;
-  details.open = false;
-}
-
-
-
-    const label = active?.textContent || 'Easy';
-
-    let index = 0;
-    if (/Standard/i.test(label)) index = 1;
-    if (/Challenge/i.test(label)) index = 2;
-    if (/Expert/i.test(label)) index = 3;
-
+  function updateExplanation() {
+    // Read the same selected class that the original game's selectLevel() sets.
+    const selected = document.querySelector('#levels button.selected');
+    const label = selected?.textContent || 'Easy';
+    const index = /^Expert/i.test(label) ? 3
+      : /^Challenge/i.test(label) ? 2
+      : /^Standard/i.test(label) ? 1 : 0;
     question.textContent = challenges[index].question;
-    details.innerHTML =
-      '<summary>Show Explanation</summary>' +
-      challenges[index].answer;
+    details.innerHTML = '<summary>Show Explanation</summary>' + challenges[index].answer;
     details.open = false;
   }
 
-
-
- 
-document.getElementById('levels')
-  ?.addEventListener('click', (event) => {
-    if (event.target.closest('button')) {
-      updateExplanation();
-    }
+  // The original level button onclick runs before this bubbling listener.
+  document.getElementById('levels').addEventListener('click', event => {
+    if (event.target.closest('button')) updateExplanation();
   });
-
-
   updateExplanation();
 })();
 </script>
