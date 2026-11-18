@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mathematical Maze Chase</title><style>
+:root{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#eaf3ff;background:#071326}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1050px;margin:auto;padding:18px}h1{margin:0 0 5px;font-size:30px}.sub{color:#aac2df;margin:0 0 16px}.panel{background:#122541;border:1px solid #294768;border-radius:15px;padding:16px;margin-bottom:13px}.toolbar,.stats,.nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.toolbar label{display:flex;flex-direction:column;gap:5px;color:#c8dbf2;font-size:13px}select,button,a.navlink{border:1px solid #416386;border-radius:9px;padding:11px 13px;font-size:15px;background:#0b1b32;color:#fff}button{background:#186da9;border:0;font-weight:700;cursor:pointer}button:hover{background:#2185c9}button:disabled{opacity:.5;cursor:not-allowed}.nav{margin:12px 0}.navlink{text-decoration:none;background:#183c63!important}.stats{margin-top:12px}.stat{flex:1;min-width:120px;text-align:center;background:#081a31;border-radius:9px;padding:9px}.stat small{display:block;color:#a6c3df}.stat b{font-size:22px}.play{position:relative;max-width:780px;margin:0 auto}canvas{width:100%;height:auto;display:block;background:#050e20;border:3px solid #2a5c91;border-radius:12px;touch-action:none}.overlay{position:absolute;inset:3px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:#051126d9;border-radius:10px;padding:22px}.overlay h2{font-size:32px;margin:0 0 8px}.overlay p{max-width:460px;line-height:1.5}.hidden{display:none}.info{line-height:1.6;color:#c3d8ef}.info strong{color:#fff}.touch{display:grid;grid-template-columns:repeat(3,55px);gap:5px;justify-content:center;margin:14px auto}.touch button{height:48px;font-size:23px;padding:0}.touch .blank{visibility:hidden}.message{font-weight:700;color:#f8ce70;min-height:24px}.foot{color:#9fb8d2;font-size:13px}.layout{display:grid;grid-template-columns:minmax(0,780px) minmax(180px,1fr);gap:14px;align-items:start}@media(max-width:820px){.layout{grid-template-columns:1fr}.wrap{padding:10px}h1{font-size:24px}}.legend{display:flex;flex-wrap:wrap;gap:12px;color:#bcd1e8;font-size:13px;margin:10px 0}.pill{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:middle}</style></head><body><main class="wrap"><h1>👾 Mathematical Maze Chase</h1><p class="sub">Collect every dot. Eat safe numbers for bonus points. Avoid forbidden numbers and outwit the gremlins!</p><div class="nav"><a class="navlink" href="interactive-games.html">← All interactive games</a><a class="navlink" href="index.html">Home</a></div><section class="panel"><div class="toolbar"><label>Difficulty<select id="difficulty"><option value="easy">Easy</option><option value="standard" selected>Standard</option><option value="challenge">Challenge</option><option value="expert">Expert</option></select></label><label>Numbers to avoid<select id="category"><option value="even">Even numbers</option><option value="odd">Odd numbers</option><option value="prime">Prime numbers</option><option value="multiple3">Multiples of 3</option><option value="square">Square numbers</option></select></label><button id="start">Start new game</button><button id="pause">Pause</button><button id="teleport">Teleport (T)</button></div><div class="stats"><div class="stat"><small>Score</small><b id="score">0</b></div><div class="stat"><small>Lives</small><b id="lives">3</b></div><div class="stat"><small>Dots left</small><b id="dots">0</b></div><div class="stat"><small>Level</small><b id="level">1</b></div><div class="stat"><small>Gremlins</small><b id="gremlins">1</b></div></div></section><div class="layout"><section><div class="play"><canvas id="game" width="756" height="588" aria-label="Maze game"></canvas><div id="overlay" class="overlay"><h2 id="overlayTitle">Ready to play?</h2><p id="overlayText">Choose a difficulty and a forbidden number category, then press Start new game.</p><button id="overlayStart">Start game</button></div></div><div class="legend"><span><i class="pill" style="background:#ffd76b"></i>Dots to collect</span><span><i class="pill" style="background:#ff6767"></i>Numbers (safe or forbidden)</span><span><i class="pill" style="background:#5fe4b1"></i>You</span><span><i class="pill" style="background:#b789ff"></i>Gremlin</span></div><div class="message" id="message" aria-live="polite"></div></section><aside class="panel info"><strong>How to play</strong><p>Move with the arrow keys or WASD. Collect all yellow dots to complete the maze. Numbers that are <strong id="mission">even numbers</strong> are forbidden; other numbers are safe to eat for 5 bonus points. All numbers look alike, so check before moving!</p><p>Press <strong>T</strong> to teleport to a safe, open tile as often as needed. When 25% or fewer dots remain, teleportation favours places near remaining dots; with five or fewer, it brings you very close. Release the arrow key to stop moving.</p><p>Each forbidden number or gremlin collision costs a life. Safe numbers are optional and do not count towards the dots remaining. When you lose a life, you return to a safe starting position. Collecting all dots advances to the next, faster level.</p><p><strong>Controls</strong></p><div class="touch"><span class="blank"></span><button data-dir="up">↑</button><span class="blank"></span><button data-dir="left">←</button><button data-dir="down">↓</button><button data-dir="right">→</button></div><p class="foot">P pauses or resumes. The game is playable with a keyboard or the on-screen direction buttons. Gremlins use different pursuit and patrol strategies.</p></aside></div></main><script>
+(()=>{'use strict';const C=27,R=21,S=28,canvas=document.getElementById('game'),ctx=canvas.getContext('2d');const $=id=>document.getElementById(id);let grid=[],dots=new Set(),hazards=new Map(),safeNumbers=new Map(),player={x:1,y:1},enemies=[],state='ready',score=0,lives=3,level=1,initialDots=0,invuln=0,stepAt=0,enemyAt=0,last=0,dir={x:0,y:0},category='even',difficulty='standard',messageTimer=0,heldKeys=new Map(),lastDirection=null;const key=(x,y)=>y*C+x;const xy=k=>({x:k%C,y:Math.floor(k/C)});const rnd=n=>Math.floor(Math.random()*n);const cfg={easy:{player:145,enemy:620,hazards:5,gremlins:1},standard:{player:125,enemy:470,hazards:8,gremlins:2},challenge:{player:108,enemy:355,hazards:11,gremlins:3},expert:{player:95,enemy:300,hazards:14,gremlins:4}};const dirs=[[1,0],[-1,0],[0,1],[0,-1]];const valid=(x,y)=>x>=0&&x<C&&y>=0&&y<R&&grid[y][x]===0;function neighbors(p){return dirs.map(([dx,dy])=>({x:p.x+dx,y:p.y+dy})).filter(q=>valid(q.x,q.y))}function randChoice(a){return a[rnd(a.length)]}function isPrime(n){if(n<2)return false;for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true}function forbidden(n){return category==='even'?n%2===0:category==='odd'?n%2===1:category==='prime'?isPrime(n):category==='multiple3'?n%3===0:Number.isInteger(Math.sqrt(n))}function makeMaze(){grid=Array.from({length:R},()=>Array(C).fill(1));const stack=[{x:1,y:1}];grid[1][1]=0;while(stack.length){const p=stack[stack.length-1];const opts=dirs.map(([dx,dy])=>({x:p.x+dx*2,y:p.y+dy*2,mx:p.x+dx,my:p.y+dy})).filter(q=>q.x>0&&q.x<C-1&&q.y>0&&q.y<R-1&&grid[q.y][q.x]);if(!opts.length){stack.pop();continue}const q=randChoice(opts);grid[q.my][q.mx]=0;grid[q.y][q.x]=0;stack.push({x:q.x,y:q.y})} // Open additional loops so the gremlin cannot trap the player in a single corridor.
+for(let i=0;i<42;i++){const x=1+rnd(C-2),y=1+rnd(R-2);if(grid[y][x]&&((valid(x-1,y)&&valid(x+1,y))||(valid(x,y-1)&&valid(x,y+1))))grid[y][x]=0} }
+function distance(a,b){return Math.abs(a.x-b.x)+Math.abs(a.y-b.y)}function bfs(start,goal){const queue=[start],seen=new Set([key(start.x,start.y)]),prev=new Map();for(let i=0;i<queue.length;i++){const p=queue[i];if(p.x===goal.x&&p.y===goal.y)break;for(const q of neighbors(p)){const k=key(q.x,q.y);if(!seen.has(k)){seen.add(k);prev.set(k,key(p.x,p.y));queue.push(q)}}}let k=key(goal.x,goal.y),startK=key(start.x,start.y);if(!seen.has(k))return null;while(prev.has(k)&&prev.get(k)!==startK)k=prev.get(k);return k===startK?start:xy(k)}function safeCells(minDist=0){const a=[];for(let y=1;y<R-1;y++)for(let x=1;x<C-1;x++)if(valid(x,y)&&!hazards.has(key(x,y))&&!safeNumbers.has(key(x,y))&&enemies.every(e=>distance({x,y},e)>minDist))a.push({x,y});return a}function placeEnemies(){
+ const count=Math.min(6,cfg[difficulty].gremlins+Math.floor((level-1)/3));
+ enemies=[];
+ const cells=[];
+ for(let y=1;y<R-1;y++)for(let x=1;x<C-1;x++)if(valid(x,y)&&!hazards.has(key(x,y))&&!safeNumbers.has(key(x,y))&&distance({x,y},player)>12)cells.push({x,y});
+ for(let i=0;i<count;i++){
+  const choices=cells.filter(p=>enemies.every(e=>distance(p,e)>7));
+  const pool=choices.length?choices:cells.filter(p=>!enemies.some(e=>e.x===p.x&&e.y===p.y));
+  if(!pool.length)break;
+  const p=randChoice(pool);enemies.push({x:p.x,y:p.y,type:i%4,heading:rnd(4),target:null});
+ }
+}
+function enemyOnPlayer(){return enemies.some(e=>e.x===player.x&&e.y===player.y)}
+function enemyGoal(e){
+ if(e.type===0)return player; // direct pursuit
+ if(e.type===1){ // intercept along player's direction, if accessible
+  let q={...player};for(let i=0;i<4;i++){const nx=q.x+dir.x,ny=q.y+dir.y;if(!valid(nx,ny))break;q={x:nx,y:ny}}return q;
+ }
+ if(e.type===2){ // patrol with pursuit when close
+  if(distance(e,player)<7)return player;
+  if(!e.target||distance(e,e.target)===0||!valid(e.target.x,e.target.y)){
+   const cells=[];for(let y=1;y<R-1;y++)for(let x=1;x<C-1;x++)if(valid(x,y)&&distance(e,{x,y})>6)cells.push({x,y});
+   e.target=cells.length?randChoice(cells):player;
+  }return e.target;
+ }
+ return null; // wandering
+}
+function updateUI(){$('score').textContent=score;$('lives').textContent='♥'.repeat(lives);$('dots').textContent=dots.size;$('level').textContent=level;$('gremlins').textContent=enemies.length;$('mission').textContent=$('category').selectedOptions[0].textContent.toLowerCase();$('pause').textContent=state==='paused'?'Resume':'Pause';$('teleport').disabled=state!=='playing'}function say(s){$('message').textContent=s;messageTimer=performance.now()+3200}function overlay(title,desc,button){$('overlayTitle').textContent=title;$('overlayText').textContent=desc;$('overlayStart').textContent=button;$('overlay').classList.remove('hidden')}function hideOverlay(){$('overlay').classList.add('hidden')}function beginLevel(){makeMaze();player={x:1,y:1};hazards=new Map();safeNumbers=new Map();dots=new Set();const open=[];for(let y=1;y<R-1;y++)for(let x=1;x<C-1;x++)if(valid(x,y)&&!(x===1&&y===1))open.push({x,y});const count=Math.min(open.length-2,cfg[difficulty].hazards+Math.floor((level-1)*1.5));const candidates=open.filter(p=>distance(p,player)>4);for(let i=0;i<count&&candidates.length;i++){const idx=rnd(candidates.length),p=candidates.splice(idx,1)[0],k=key(p.x,p.y);let n=1+rnd(99);while(!forbidden(n))n=1+rnd(99);hazards.set(k,n)}
+// Add safe numbers in other open squares; neither type of number hides a required dot.
+const safeCount=Math.min(candidates.length,Math.max(4,Math.round(count*.8)));
+for(let i=0;i<safeCount&&candidates.length;i++){const idx=rnd(candidates.length),p=candidates.splice(idx,1)[0],k=key(p.x,p.y);let n=1+rnd(99);while(forbidden(n))n=1+rnd(99);safeNumbers.set(k,n)}
+for(const p of open){const k=key(p.x,p.y);if(!hazards.has(k)&&!safeNumbers.has(k))dots.add(k)}initialDots=dots.size;placeEnemies();dir={x:0,y:0};heldKeys.clear();invuln=performance.now()+1800;stepAt=0;enemyAt=0;updateUI();say(`Level ${level}: collect ${dots.size} dots and avoid ${$('category').selectedOptions[0].textContent.toLowerCase()}!`)}function newGame(){difficulty=$('difficulty').value;category=$('category').value;score=0;lives=3;level=1;beginLevel();state='playing';hideOverlay();updateUI()}function hit(why){if(performance.now()<invuln||state!=='playing')return;lives--;say(`${why} You lost a life.`);if(lives<=0){state='over';overlay('Game over',`Final score: ${score}. You reached level ${level}.`,'Play again')}else{const cells=safeCells(10);player=cells.length?randChoice(cells):{x:1,y:1};dir={x:0,y:0};heldKeys.clear();invuln=performance.now()+2000;placeEnemies()}updateUI()}function checkCell(){const k=key(player.x,player.y);if(hazards.has(k)){hit(`You touched ${hazards.get(k)} — a forbidden number!`);return}if(safeNumbers.has(k)){const n=safeNumbers.get(k);safeNumbers.delete(k);score+=5;say(`Safe number ${n}! +5 points.`)}if(dots.delete(k)){score+=10;if(!dots.size){score+=100;level++;beginLevel();return}}if(enemyOnPlayer())hit('The gremlin caught you!');updateUI()}function move(){if(!heldKeys.size)return;const d=lastDirection&&heldKeys.has(lastDirection)?heldKeys.get(lastDirection):Array.from(heldKeys.values()).at(-1);if(!d)return;dir={x:d[0],y:d[1]};const nx=player.x+dir.x,ny=player.y+dir.y;if(valid(nx,ny)){player={x:nx,y:ny};checkCell()}}function moveEnemy(){
+ if(state!=='playing')return;
+ const occupied=new Set();
+ for(const e of enemies){
+  const goal=enemyGoal(e);
+  let next=goal?bfs(e,goal):null;
+  if(!next||next===e){const opts=neighbors(e).filter(p=>!occupied.has(key(p.x,p.y)));if(opts.length)next=randChoice(opts)}
+  if(next&&!occupied.has(key(next.x,next.y))){e.x=next.x;e.y=next.y}
+  occupied.add(key(e.x,e.y));
+ }
+ if(enemyOnPlayer())hit('A gremlin caught you!');
+}
+// Multi-source shortest-path distances from the remaining dots, through open maze tiles.
+// Unlike straight-line distance, this accounts for walls and corridors.
+function dotDistances(){
+ const dist=new Map(),queue=[];
+ for(const k of dots){dist.set(k,0);queue.push(xy(k))}
+ for(let i=0;i<queue.length;i++){
+  const p=queue[i],d=dist.get(key(p.x,p.y));
+  for(const q of neighbors(p)){
+   const k=key(q.x,q.y);
+   if(!dist.has(k)){dist.set(k,d+1);queue.push(q)}
+  }
+ }
+ return dist;
+}
+function teleport(){
+ if(state!=='playing')return;
+ // Keep the normal safe-distance requirement, relaxing it only when necessary.
+ let cells=[];
+ for(const minDist of [7,5,3,1]){
+  cells=safeCells(minDist).filter(p=>!(p.x===player.x&&p.y===player.y)&&!dots.has(key(p.x,p.y)));
+  if(cells.length)break;
+ }
+ if(!cells.length){say('No safe teleport destination is available.');return}
+ let destination=null;
+ const remaining=dots.size;
+ if(remaining>0&&remaining<=Math.ceil(initialDots*.25)){
+  const distances=dotDistances();
+  const ranked=cells.filter(p=>distances.has(key(p.x,p.y)))
+   .map(p=>({p,d:distances.get(key(p.x,p.y))}));
+  if(ranked.length){
+   // With five or fewer dots, favour cells 1–3 walking steps from a dot.
+   // Earlier, when at most 25% remain, use a broader 2–6-step neighbourhood.
+   const limit=remaining<=5?3:6;
+   let pool=ranked.filter(q=>q.d>=1&&q.d<=limit);
+   if(!pool.length){const nearest=Math.min(...ranked.map(q=>q.d));pool=ranked.filter(q=>q.d===nearest)}
+   destination=randChoice(pool).p;
+  }
+ }
+ player=destination||randChoice(cells);
+ dir={x:0,y:0};heldKeys.clear();invuln=performance.now()+900;
+ checkCell();
+ say(destination?'Teleported near a remaining dot!':'Teleported to a safe location!');
+ updateUI();
+}
+function pause(){if(state==='playing'){heldKeys.clear();dir={x:0,y:0};state='paused';overlay('Paused','Press P or Resume to continue.','Resume')}else if(state==='paused'){state='playing';hideOverlay()}updateUI()}function draw(t){ctx.fillStyle='#061226';ctx.fillRect(0,0,canvas.width,canvas.height);for(let y=0;y<R;y++)for(let x=0;x<C;x++){const px=x*S,py=y*S;if(grid[y]?.[x]===1){ctx.fillStyle='#1d55b1';ctx.fillRect(px+1,py+1,S-2,S-2);ctx.fillStyle='#3279e5';ctx.fillRect(px+4,py+4,S-8,3)}else if(dots.has(key(x,y))){ctx.fillStyle='#ffd66e';ctx.beginPath();ctx.arc(px+S/2,py+S/2,3,0,Math.PI*2);ctx.fill()}}for(const [k,n] of [...hazards,...safeNumbers]){const p=xy(k),px=p.x*S,py=p.y*S;ctx.fillStyle='#a72d43';ctx.beginPath();ctx.roundRect(px+2,py+3,S-4,S-6,6);ctx.fill();ctx.fillStyle='white';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 13px system-ui';ctx.fillText(n,px+S/2,py+S/2+1)}for(const e of enemies){let ex=e.x*S+S/2,ey=e.y*S+S/2;
+ ctx.fillStyle=['#bb8bff','#ff89ae','#80c9ff','#ffad68'][e.type];ctx.beginPath();ctx.arc(ex,ey-2,10,Math.PI,0);ctx.lineTo(ex+10,ey+9);ctx.lineTo(ex+5,ey+5);ctx.lineTo(ex,ey+9);ctx.lineTo(ex-5,ey+5);ctx.lineTo(ex-10,ey+9);ctx.closePath();ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(ex-4,ey-3,3,0,7);ctx.arc(ex+4,ey-3,3,0,7);ctx.fill();ctx.fillStyle='#101735';ctx.fillRect(ex-4,ey-4,2,3);ctx.fillRect(ex+4,ey-4,2,3)}
+if(t>invuln||Math.floor(t/120)%2===0){const px=player.x*S+S/2,py=player.y*S+S/2;ctx.fillStyle='#56e8af';ctx.beginPath();const angle=dir.x===1?0:dir.x===-1?Math.PI:dir.y===1?Math.PI/2:-Math.PI/2;ctx.arc(px,py,11,angle+.32,angle+Math.PI*2-.32);ctx.lineTo(px,py);ctx.fill()}}function frame(t){if(state==='playing'){if(t-stepAt>Math.max(68,cfg[difficulty].player-level*3)){move();stepAt=t}if(t-enemyAt>Math.max(125,cfg[difficulty].enemy-(level-1)*32)){moveEnemy();enemyAt=t}}draw(t);requestAnimationFrame(frame)}function direction(dx,dy,k){if(state!=='playing')return;heldKeys.set(k,[dx,dy]);lastDirection=k;dir={x:dx,y:dy};if(performance.now()-stepAt>45){move();stepAt=performance.now()}}function release(k){heldKeys.delete(k);if(lastDirection===k)lastDirection=Array.from(heldKeys.keys()).at(-1)||null;if(!heldKeys.size)dir={x:0,y:0}}const keyDirs={arrowup:[0,-1],w:[0,-1],arrowdown:[0,1],s:[0,1],arrowleft:[-1,0],a:[-1,0],arrowright:[1,0],d:[1,0]};document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(keyDirs[k]||[' ','t','p'].includes(k))e.preventDefault();if(keyDirs[k]){if(!e.repeat)direction(...keyDirs[k],k)}else if(!e.repeat&&k==='t')teleport();else if(!e.repeat&&(k==='p'||k===' '))pause()});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(keyDirs[k]){e.preventDefault();release(k)}});window.addEventListener('blur',()=>{heldKeys.clear();dir={x:0,y:0}});document.querySelectorAll('[data-dir]').forEach(b=>{const d={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[b.dataset.dir],k='touch-'+b.dataset.dir;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);direction(...d,k)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>release(k))});$('start').onclick=newGame;$('overlayStart').onclick=()=>state==='paused'?pause():newGame();$('pause').onclick=pause;$('teleport').onclick=teleport;$('category').onchange=updateUI;grid=Array.from({length:R},()=>Array(C).fill(1));makeMaze();updateUI();requestAnimationFrame(frame)})();
+</script></body></html>
