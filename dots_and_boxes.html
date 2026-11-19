@@ -1,0 +1,105 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dots and Boxes — emathame</title><style>
+:root{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#172b48;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:920px;margin:auto;padding:22px 16px 45px}h1{margin:10px 0 4px;font-size:clamp(26px,4vw,38px)}.sub{color:#54657a;margin:0 0 14px}.nav{display:flex;gap:16px;margin-bottom:16px}.nav a{color:#155e9a}.panel{background:white;border-radius:15px;padding:18px;box-shadow:0 4px 20px #162b4a13;margin:12px 0}.settings{display:flex;gap:12px;align-items:end;flex-wrap:wrap}label{display:grid;gap:5px;font-size:13px;font-weight:700}select,button{font:inherit;border-radius:8px;padding:10px 13px;border:1px solid #c5d0dd;background:white}button{cursor:pointer;background:#1768a5;color:white;border-color:#1768a5;font-weight:700}button.secondary{background:#fff;color:#1768a5}button:disabled{opacity:.5;cursor:default}.score{display:flex;justify-content:space-around;align-items:center;gap:8px;flex-wrap:wrap}.person{text-align:center;padding:8px 14px;border:2px solid transparent;border-radius:12px;min-width:130px}.person.active{border-color:#ffb84d;background:#fff8e8}.person b{font-size:30px;display:block}.blue{color:#2175d3}.red{color:#d74d61}.status{text-align:center;font-weight:700;margin:10px 0;min-height:24px}.boardwrap{display:flex;justify-content:center;overflow:auto;touch-action:manipulation}svg{width:min(100%,610px);height:auto;user-select:none;touch-action:manipulation}.edge{stroke:#b9c8d8;stroke-width:5;stroke-linecap:round}.edge.claimed0{stroke:#2175d3}.edge.claimed1{stroke:#d74d61}.hit{stroke:transparent;stroke-width:24;cursor:pointer}.hit:hover:not(.used)+.edge{stroke:#e9a630}@keyframes cpuLineFlash{0%,100%{stroke:#d74d61;stroke-width:5}12%,38%,64%,88%{stroke:#ffe600;stroke-width:12;filter:drop-shadow(0 0 5px #ffb800)}25%,51%,76%{stroke:#d74d61;stroke-width:5}}.edge.cpu-flash{animation:cpuLineFlash 1.05s linear both;pointer-events:none}@keyframes cpuBoxFlash{0%,100%{fill-opacity:.17}25%,65%{fill:#ffe600;fill-opacity:.6}}.cpu-box-flash{animation:cpuBoxFlash 1.05s linear both}.dot{fill:#253e60;pointer-events:none}.box0{fill:#2175d3;fill-opacity:.17}.box1{fill:#d74d61;fill-opacity:.17}.instructions{color:#516177;font-size:14px;line-height:1.6}#thinking{color:#6b7382;font-weight:500}@media(max-width:500px){.panel{padding:12px}.person{min-width:110px}.wrap{padding:12px}}
+</style></head><body><main class="wrap"><h1>Dots and Boxes</h1><p class="sub">Claim more squares than your opponent. Complete a square to play again! — Version 3</p><nav class="nav"><a href="interactive-games.html">← Games Menu</a><a href="index.html">← Main Website</a></nav><section class="panel settings"><label>Game mode<select id="mode"><option value="cpu">Against computer</option><option value="human">Two players</option></select></label><label>Grid size<select id="size"><option value="3">3 × 3</option><option value="4">4 × 4</option><option value="5" selected>5 × 5</option><option value="6">6 × 6</option><option value="7">7 × 7</option><option value="10">10 × 10</option></select></label><label>Computer difficulty<select id="difficulty"><option value="easy">Easy</option><option value="standard" selected>Standard</option><option value="challenge">Challenge</option></select></label><button id="new">New Game</button></section><section class="panel"><div class="score"><div class="person active" id="p0"><span id="name0">You</span><b class="blue" id="s0">0</b></div><div><div class="status" id="status" aria-live="polite">Your turn</div><div id="thinking" style="text-align:center"></div></div><div class="person" id="p1"><span id="name1">Computer</span><b class="red" id="s1">0</b></div></div><div class="boardwrap"><svg id="board" role="img" aria-label="Dots and Boxes game board"></svg></div><p class="instructions">Click or tap a line between adjacent dots. Each completed square earns one point and another turn. A line that completes two squares earns two points. The player with the most squares wins. The computer’s new line flashes yellow before its next move. Challenge mode uses chain-aware tactics and exact endgame calculation when few lines remain. Choose New Game to change settings.</p></section></main><script>
+(()=>{'use strict';const $=id=>document.getElementById(id);let n=5,mode='cpu',difficulty='standard',edges=[],boxes=[],turn=0,scores=[0,0],finished=false,thinking=false,gameId=0,lastGain=0,lastMover=-1,flashIndex=-1,flashBoxes=[];const key=(r,c,dir)=>dir+'-'+r+'-'+c;let edgeMap=new Map();function init(){gameId++;n=+$('size').value;mode=$('mode').value;difficulty=$('difficulty').value;edges=[];boxes=[];edgeMap=new Map();turn=0;scores=[0,0];finished=false;thinking=false;lastGain=0;lastMover=-1;flashIndex=-1;flashBoxes=[];for(let r=0;r<=n;r++)for(let c=0;c<n;c++)addEdge(r,c,'h');for(let r=0;r<n;r++)for(let c=0;c<=n;c++)addEdge(r,c,'v');for(let r=0;r<n;r++)for(let c=0;c<n;c++)boxes.push({r,c,owner:-1});$('name0').textContent=mode==='cpu'?'You':'Player 1';$('name1').textContent=mode==='cpu'?'Computer':'Player 2';$('difficulty').disabled=mode==='human';draw();update()}
+function addEdge(r,c,dir){let e={r,c,dir,owner:-1,index:edges.length};edges.push(e);edgeMap.set(key(r,c,dir),e)}function sides(b){return [edgeMap.get(key(b.r,b.c,'h')),edgeMap.get(key(b.r+1,b.c,'h')),edgeMap.get(key(b.r,b.c,'v')),edgeMap.get(key(b.r,b.c+1,'v'))]}function adjacent(e){return boxes.filter(b=>b.owner<0&&sides(b).includes(e))}function completion(e){return adjacent(e).filter(b=>sides(b).filter(x=>x.owner>=0).length===3).length}function danger(e){return adjacent(e).some(b=>sides(b).filter(x=>x.owner>=0).length===2)}
+function move(index,who){if(finished||(thinking&&who===0)||who!==turn)return;let e=edges[index];if(!e||e.owner!==-1)return;const newly=[];e.owner=who;let count=0;for(const b of adjacent(e)){if(sides(b).every(x=>x.owner>=0)){b.owner=who;newly.push(b);count++}}scores[who]+=count;lastGain=count;lastMover=who;if(!count)turn=1-who;if(boxes.every(b=>b.owner>=0))finished=true;
+if(who===1&&mode==='cpu'){
+  flashIndex=index;flashBoxes=newly.map(b=>key(b.r,b.c,'box'));thinking=true;draw();update();
+  const id=gameId;
+  setTimeout(()=>{if(id!==gameId)return;flashIndex=-1;flashBoxes=[];thinking=false;draw();update();if(!finished&&turn===1)scheduleCpu()},1100);
+}else{flashIndex=-1;flashBoxes=[];draw();update();if(!finished&&mode==='cpu'&&turn===1)scheduleCpu()}
+}
+function update(){$('s0').textContent=scores[0];$('s1').textContent=scores[1];$('p0').classList.toggle('active',!finished&&turn===0);$('p1').classList.toggle('active',!finished&&turn===1);if(finished){let result=scores[0]===scores[1]?'It’s a draw!':scores[0]>scores[1]?(mode==='cpu'?'You win!':'Player 1 wins!'):(mode==='cpu'?'Computer wins!':'Player 2 wins!');$('status').textContent=result+'  '+scores[0]+'–'+scores[1];$('thinking').textContent='Game complete'}else{$('status').textContent=mode==='cpu'?(turn===0?'Your turn':'Computer’s turn'):(turn===0?'Player 1’s turn':'Player 2’s turn');$('thinking').textContent=thinking?(flashIndex>=0?'Computer’s move highlighted…':'Computer is choosing…'):(lastGain>0?(lastMover===0?(mode==='cpu'?'You':'Player 1'):(mode==='cpu'?'Computer':'Player 2'))+' completed '+lastGain+' square'+(lastGain===1?'':'s')+' and plays again!':'')}}
+function draw(){let svg=$('board'),pad=30,step= Math.min(80,550/n),total=2*pad+n*step;svg.setAttribute('viewBox',`0 0 ${total} ${total}`);svg.replaceChildren();const ns='http://www.w3.org/2000/svg';function el(tag,attrs,parent=svg){let x=document.createElementNS(ns,tag);for(let [k,v]of Object.entries(attrs))x.setAttribute(k,v);parent.appendChild(x);return x}for(let b of boxes)if(b.owner>=0){el('rect',{x:pad+b.c*step+7,y:pad+b.r*step+7,width:step-14,height:step-14,rx:7,class:'box'+b.owner+(flashBoxes.includes(key(b.r,b.c,'box'))?' cpu-box-flash':'')});let t=el('text',{x:pad+(b.c+.5)*step,y:pad+(b.r+.5)*step+7,'text-anchor':'middle','font-size':Math.min(24,step*.42),'font-weight':'bold',fill:b.owner===0?'#2175d3':'#d74d61'});t.textContent=b.owner===0?'1':'2'}for(let e of edges){let x1=pad+e.c*step,y1=pad+e.r*step,x2=x1+(e.dir==='h'?step:0),y2=y1+(e.dir==='v'?step:0);let g=el('g',{});let hit=el('line',{x1,y1,x2,y2,class:'hit'+(e.owner>=0?' used':'')},g);el('line',{x1,y1,x2,y2,class:'edge'+(e.owner>=0?' claimed'+e.owner:'')+(e.index===flashIndex?' cpu-flash':'')},g);if(e.owner<0){hit.addEventListener('click',()=>move(e.index,0));hit.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();move(e.index,0)}});hit.setAttribute('tabindex','0');hit.setAttribute('role','button');hit.setAttribute('aria-label',`${e.dir==='h'?'Horizontal':'Vertical'} line at row ${e.r+1}, column ${e.c+1}`)}}for(let r=0;r<=n;r++)for(let c=0;c<=n;c++)el('circle',{cx:pad+c*step,cy:pad+r*step,r:Math.max(4,step*.075),class:'dot'})}
+function scheduleCpu(){if(thinking||finished)return;thinking=true;update();let id=gameId;setTimeout(()=>{if(id!==gameId||finished||turn!==1)return;thinking=false;let e=chooseCpu();if(e)move(e.index,1)},330)}// Computer strategy: capture completed boxes; avoid giving away third sides;
+// evaluate forced chains, and solve small endgames exactly using minimax.
+function chooseCpu(){
+ const avail=edges.filter(e=>e.owner<0);
+ if(difficulty==='easy'){
+   const wins=avail.filter(e=>completion(e)>0);
+   const pool=wins.length&&Math.random()<.72?wins:avail;
+   return pool[Math.floor(Math.random()*pool.length)];
+ }
+ const wins=avail.filter(e=>completion(e)>0);
+ if(difficulty==='standard'){
+   if(wins.length)return wins.sort((a,b)=>completion(b)-completion(a))[0];
+   const safe=avail.filter(e=>!danger(e));
+   return (safe.length?safe:avail)[Math.floor(Math.random()*(safe.length?safe:avail).length)];
+ }
+ // Challenge: exact optimal play when the number of remaining edges is manageable.
+ if(avail.length<=17){const best=exactEndgame(avail);if(best)return best;}
+ // At the end of a chain, deliberately leave two boxes for the opponent when
+ // that preserves control of another chain (the classic double-cross tactic).
+ if(wins.length){
+   const safe=avail.filter(e=>completion(e)===0&&!danger(e));
+   if(!safe.length){
+     const sacrifices=avail.filter(e=>completion(e)===0);
+     if(sacrifices.length){
+       let ranked=sacrifices.map(e=>({e,cost:opponentForcedGain(e)})).sort((a,b)=>a.cost-b.cost);
+       if(ranked[0].cost===2 && wins.length>0 && remainingUnclaimedBoxes()>2)return ranked[0].e;
+     }
+   }
+   return wins.sort((a,b)=>completion(b)-completion(a))[0];
+ }
+ const safe=avail.filter(e=>!danger(e));
+ if(safe.length){
+   // Minimise creation of future vulnerable boxes; break ties with variety.
+   const ranked=safe.map(e=>({e,score:adjacent(e).reduce((sum,b)=>sum+sides(b).filter(x=>x.owner>=0).length,0)}));
+   ranked.sort((a,b)=>a.score-b.score);
+   const best=ranked.filter(x=>x.score===ranked[0].score);
+   return best[Math.floor(Math.random()*best.length)].e;
+ }
+ // No safe edge exists. Sacrifice the shortest forced chain.
+ return avail.map(e=>({e,cost:opponentForcedGain(e)})).sort((a,b)=>a.cost-b.cost)[0].e;
+}
+function remainingUnclaimedBoxes(){return boxes.filter(b=>b.owner<0).length}
+function opponentForcedGain(edge){
+ // Simulate the edge and greedily count the boxes an opponent could capture
+ // in the resulting forced sequence. Restore the state afterwards.
+ edge.owner=9;
+ const changes=[edge];let gain=0;
+ for(let i=0;i<boxes.length;i++){
+   const b=boxes[i];if(b.owner>=0)continue;
+   if(sides(b).every(e=>e.owner>=0)){b.owner=9;gain++}
+ }
+ // All completed squares belong to the mover; only remaining squares count.
+ let again=true;
+ while(again){again=false;for(const b of boxes){
+   if(b.owner>=0)continue;
+   const free=sides(b).filter(e=>e.owner<0);
+   if(free.length===1){free[0].owner=9;changes.push(free[0]);again=true;break}
+ }}
+ for(const b of boxes)if(b.owner===9)b.owner=-1;
+ for(const e of changes)e.owner=-1;
+ return gain+changes.length-1;
+}
+function exactEndgame(avail){
+ // Exact negamax over the remaining edges, including bonus turns.
+ const ids=avail.map(e=>e.index), boxMasks=[];
+ for(const b of boxes){if(b.owner>=0)continue;
+   let mask=0;for(const e of sides(b)){const k=ids.indexOf(e.index);if(k>=0)mask|=(1<<k)}
+   boxMasks.push(mask);
+ }
+ const all=(1<<ids.length)-1, memo=new Map();
+ function solve(mask){if(mask===all)return 0;if(memo.has(mask))return memo.get(mask);
+   let best=-999;for(let k=0;k<ids.length;k++){
+     const bit=1<<k;if(mask&bit)continue;
+     const next=mask|bit;
+     let gained=0;
+     for(const bm of boxMasks)if((bm&bit)!==0&&(bm&next)===bm&&(bm&mask)!==bm)gained++;
+     const val=gained?gained+solve(next):-solve(next);
+     if(val>best)best=val;
+   }memo.set(mask,best);return best;
+ }
+ let best=-999,chosen=0;
+ for(let k=0;k<ids.length;k++){
+   const mask=1<<k;let gained=0;
+   for(const bm of boxMasks)if((bm&mask)===bm)gained++;
+   const val=gained?gained+solve(mask):-solve(mask);
+   if(val>best){best=val;chosen=k}
+ }
+ return edges[ids[chosen]];
+}
+$('new').addEventListener('click',init);$('mode').addEventListener('change',()=>{$('difficulty').disabled=$('mode').value==='human'});init()})();
+</script></body></html>
