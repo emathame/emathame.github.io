@@ -12,7 +12,38 @@ function safeError(e){return e?.message||'Something went wrong. Please try again
 <script>
 let selected=null, submissions=[], puzzles=[];
 function showAdmin(yes){el('login-panel').classList.toggle('hidden',yes);el('admin-panel').classList.toggle('hidden',!yes);}
-async function loadPuzzles(){const {data,error}=await db.rpc('admin_list_puzzles');if(error){message('admin-status',safeError(error),true);return;}puzzles=data||[];let s=el('puzzles'),previous=s.value;s.replaceChildren();for(let p of puzzles){let o=document.createElement('option');o.value=p.id;o.textContent=p.puzzle_date+' — '+p.title+' ('+p.submission_count+' entries)'+(p.published?' ✓ Published':'');s.append(o);}if(puzzles.some(p=>String(p.id)===previous))s.value=previous;await loadSubmissions();}
+
+async function loadPuzzles(){
+  const {data,error}=await db.rpc('admin_list_puzzles');
+  if(error){message('admin-status',safeError(error),true);return;}
+  puzzles=data||[];
+  let s=el('puzzles');
+  let previous=s.value;
+  s.replaceChildren();
+  for(let p of puzzles){
+    let o=document.createElement('option');
+    o.value=p.id;
+    o.textContent=p.puzzle_date+' — '+p.title+' ('+p.submission_count+' entries)'+(p.published?' ✓ Published':'');
+    s.append(o);
+  }
+  const today=new Intl.DateTimeFormat('en-CA',{
+    timeZone:'Australia/Melbourne',
+    year:'numeric',
+    month:'2-digit',
+    day:'2-digit'
+  }).format(new Date());
+  const todayPuzzle=puzzles.find(p=>p.puzzle_date===today);
+  if(previous && puzzles.some(p=>String(p.id)===previous)){
+    s.value=previous;
+  }else if(todayPuzzle){
+    s.value=String(todayPuzzle.id);
+  }else{
+    const nextPuzzle=puzzles.find(p=>p.puzzle_date>today);
+    if(nextPuzzle)s.value=String(nextPuzzle.id);
+  }
+  await loadSubmissions();
+}
+
 async function loadSubmissions(){selected=null;el('publish').disabled=true;el('selection').textContent='No winner selected. You may publish without a winner if no entry is correct.';let id=Number(el('puzzles').value);let p=puzzles.find(p=>p.id===id);if(!p){el('submissions').textContent='No puzzles found.';return;}el('puzzle-info').textContent=p.puzzle_date+' · '+p.difficulty+(p.published?' · Already published':'');const {data,error}=await db.rpc('admin_get_submissions',{p_puzzle_id:id});if(error){message('admin-status',safeError(error),true);return;}submissions=data||[];let root=el('submissions');root.replaceChildren();if(!submissions.length)root.textContent='No submissions for this puzzle.';for(let s of submissions){let d=document.createElement('div');d.className='entry';let h=document.createElement('strong');h.textContent=s.nickname+' · '+new Date(s.submitted_at).toLocaleString('en-AU',{timeZone:'Australia/Melbourne',dateStyle:'medium',timeStyle:'short'})+' Melbourne time';let a=document.createElement('div');a.className='answer';a.textContent=s.submitted_answer;let b=document.createElement('button');b.type='button';b.textContent='Select as first correct';b.addEventListener('click',()=>{selected=s.submission_id;el('selection').textContent='Selected: '+s.nickname+' (submission #'+s.submission_id+')';});d.append(h,a,b);root.append(d);}let parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Australia/Melbourne',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).reduce((o,x)=>(o[x.type]=x.value,o),{});let closed=p.puzzle_date<[parts.year,parts.month,parts.day].join('-');el('publish').disabled=!closed;}
 el('login-form').addEventListener('submit',async e=>{e.preventDefault();el('login-button').disabled=true;let {error}=await db.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});el('password').value='';el('login-button').disabled=false;if(error)message('login-status',safeError(error),true);else{showAdmin(true);await loadPuzzles();}});
 el('logout').addEventListener('click',async()=>{await db.auth.signOut();showAdmin(false);});
