@@ -199,6 +199,11 @@ Your email address will never be published.
   const status = document.getElementById('comment-status');
   const button = document.getElementById('submit-comment-button');
 
+  if (!form || !button || !status) {
+    console.error('Comment form elements could not be found.');
+    return;
+  }
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -223,12 +228,15 @@ Your email address will never be published.
         headers: {...headers, 'Prefer': 'return=minimal'},
         body: JSON.stringify(payload)
       });
-      if (!response.ok) throw new Error(`Submission rejected (${response.status})`);
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(`Submission rejected (${response.status}): ${details}`);
+      }
       form.reset();
       status.textContent = 'Thank you! Your comment has been received and is awaiting review.';
     } catch (error) {
       console.error('Comment submission failed:', error);
-      status.textContent = 'Sorry, your comment could not be submitted. Please try again later.';
+      status.textContent = 'Sorry, your comment could not be submitted. Please contact the website owner or try again later.';
     } finally {
       button.disabled = false;
     }
