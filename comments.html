@@ -107,13 +107,11 @@
 Your comment will be sent privately for review.
 Only comments for which publication permission has
 been given may appear on this website.
-Your email address will never be published.which is better
- 
+Your email address will never be published.
 
 </p>
 
-<form action="https://formspree.io/f/xrpqplnl"
-      method="POST">
+<form id="visitor-comment-form">
 
   <label for="visitor-name">Your name:</label>
   <input type="text"
@@ -170,7 +168,7 @@ Your email address will never be published.which is better
   </button>
 
 </form>
-
+<p id="comment-status" role="status" aria-live="polite"></p>
 
 
  
@@ -178,10 +176,8 @@ Your email address will never be published.which is better
 
 <h2>Visitor Comments</h2>
 
-<p>
-  Approved comments from visitors will appear here.
-  Thank you for sharing your thoughts and suggestions.
-</p>
+<p id="comments-intro">Approved comments from visitors will appear here. Thank you for sharing your thoughts and suggestions.</p>
+<div id="published-comments" aria-live="polite"></div>
 
   </section>
 </main>
@@ -189,5 +185,90 @@ Your email address will never be published.which is better
 <footer>
   PhiloMathematica · Mathematics, Stories & Curiosity
 </footer>
+
+<script>
+(() => {
+  // Public browser credentials only. Never place a Supabase secret/service-role key here.
+  const SUPABASE_URL = 'https://tforswmaamlvggylmhsx.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_0eKIeylthFtFS9LpTLeebw_f2FBuhjM';
+  const headers = {
+    'apikey': SUPABASE_PUBLISHABLE_KEY,
+    'Content-Type': 'application/json'
+  };
+  const form = document.getElementById('visitor-comment-form');
+  const status = document.getElementById('comment-status');
+  const button = document.getElementById('submit-comment-button');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    button.disabled = true;
+    status.textContent = 'Sending your comment…';
+    const payload = {
+      visitor_name: document.getElementById('visitor-name').value.trim() || null,
+      visitor_email: document.getElementById('visitor-email').value.trim() || null,
+      subject: document.getElementById('subject').value,
+      message: document.getElementById('comment').value.trim(),
+      publication_consent: form.elements.publication_consent.checked,
+      approved: false
+    };
+    if (!payload.message) {
+      status.textContent = 'Please enter a comment.';
+      button.disabled = false;
+      return;
+    }
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/visitor_comments`, {
+        method: 'POST',
+        headers: {...headers, 'Prefer': 'return=minimal'},
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error(`Submission rejected (${response.status})`);
+      form.reset();
+      status.textContent = 'Thank you! Your comment has been received and is awaiting review.';
+    } catch (error) {
+      console.error('Comment submission failed:', error);
+      status.textContent = 'Sorry, your comment could not be submitted. Please try again later.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  async function loadPublishedComments() {
+    const container = document.getElementById('published-comments');
+    try {
+      // Query only public-safe fields from the dedicated published view; never query visitor_email.
+      const url = `${SUPABASE_URL}/rest/v1/published_comments?select=visitor_name,subject,message,created_at&order=created_at.desc&limit=50`;
+      const response = await fetch(url, { headers: {apikey: SUPABASE_PUBLISHABLE_KEY} });
+      if (!response.ok) throw new Error(`Published comments unavailable (${response.status})`);
+      const comments = await response.json();
+      if (!Array.isArray(comments) || comments.length === 0) return;
+      document.getElementById('comments-intro').textContent = 'Comments shared with permission:';
+      for (const comment of comments) {
+        const article = document.createElement('article');
+        article.style.cssText = 'border-top:1px solid #dce4ee;padding:16px 0;';
+        const heading = document.createElement('strong');
+        heading.textContent = comment.visitor_name || 'Anonymous visitor';
+        article.appendChild(heading);
+        if (comment.subject) {
+          const subject = document.createElement('div');
+          subject.textContent = comment.subject;
+          subject.style.color = '#63758a';
+          article.appendChild(subject);
+        }
+        const message = document.createElement('p');
+        message.textContent = comment.message || '';
+        message.style.whiteSpace = 'pre-wrap';
+        article.appendChild(message);
+        container.appendChild(article);
+      }
+    } catch (error) {
+      console.error('Unable to load published comments:', error);
+      // No raw error details or private data shown to visitors.
+    }
+  }
+  loadPublishedComments();
+})();
+</script>
 </body>
 </html>
